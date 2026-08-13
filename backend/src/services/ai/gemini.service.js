@@ -1,6 +1,15 @@
 /**
  * Service to interface with Google Gemini AI using the official @google/genai SDK.
  * Handles food analysis (text & image) and daily personalized insights.
+ *
+ * ── dotenv note ─────────────────────────────────────────────────────────────
+ * This service reads GEMINI_API_KEY from process.env at call time.
+ * Backend-1 must call `require('dotenv').config()` at the very top of the
+ * Express app entry point (e.g. src/index.js) BEFORE importing any service.
+ * Example:
+ *   require('dotenv').config();
+ *   const aiRoutes = require('./routes/ai.routes');
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 const { GoogleGenAI } = require('@google/genai');

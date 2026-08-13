@@ -46,25 +46,67 @@ async function analyze(req, res) {
 
 /**
  * Handler for GET /api/insight
- * Note: Under the final architecture, Collaborator 3 (Backend-1) will wrap this
- * with Auth middleware to get the current user, fetch their profile and today's meals from DB,
- * and handle caching.
+ *
+ * ── Integration guide for Backend-1 ─────────────────────────────────────────
+ * This controller is the bridge between the AI service and the Express layer.
+ * Backend-1 MUST do the following before this handler runs:
+ *
+ *   1. Add JWT auth middleware to the route so that req.user is populated:
+ *        router.get('/insight', jwtAuthMiddleware, analyzeController.getInsight);
+ *
+ *   2. Inside this controller (or via middleware), fetch from MongoDB:
+ *        const profile = await Profile.findOne({ userId: req.user.id });
+ *        const meals   = await Food.find({
+ *          userId: req.user.id,
+ *          createdAt: { $gte: startOfToday, $lte: endOfToday }
+ *        });
+ *
+ *   3. Optionally cache the result (e.g. in-memory or Redis):
+ *        key: `insight:${req.user.id}:${today's date string}`
+ *        If the cache contains a result for today, return it directly without
+ *        calling generateDailyInsight() again.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 async function getInsight(req, res) {
   try {
-    // These objects should be retrieved by Backend-1 from their database
-    // profile: age, height, weight, activity, diet, allergies, conditions, notes
-    // meals: array of logged meals for today
-    const { profile, meals } = req.body || {};
-
-    if (!profile) {
-      return res.status(400).json({ error: 'Missing health profile for insight generation.' });
+    // ── Step 1: Verify authenticated user ────────────────────────────────────
+    // req.user is populated by Backend-1's JWT middleware.
+    // If it is missing, return 401 immediately.
+    if (!req.user) {
+      return res.status(401).json({
+        error: 'Authentication required. Please log in to receive your daily insight.'
+      });
     }
 
-    const insight = await geminiService.generateDailyInsight(profile, meals || []);
+    // ── Step 2: Retrieve profile and today's meals ────────────────────────────
+    // TODO (Backend-1): Replace these stubs with real DB queries.
+    //
+    //   const profile = await Profile.findOne({ userId: req.user.id });
+    //   const today   = new Date();
+    //   const meals   = await Food.find({
+    //     userId:    req.user.id,
+    //     createdAt: { $gte: startOfDay(today), $lte: endOfDay(today) }
+    //   });
+    //
+    // For now, fall back to empty stubs so the AI generates a generic insight.
+    const profile = req.user.profile || null;
+    const meals   = req.user.meals   || [];
+
+    // ── Step 3: Call the AI service ───────────────────────────────────────────
+    // generateDailyInsight() is a pure function — no Express objects inside.
+    // Backend-1 can also call it directly from their own controller if preferred.
+    const insight = await geminiService.generateDailyInsight(profile, meals);
+
+    // ── Step 4: Return the result ─────────────────────────────────────────────
+    // Backend-1 should cache this result before returning:
+    //   await cache.set(`insight:${req.user.id}:${todayDateString}`, insight);
     return res.status(200).json(insight);
+
   } catch (error) {
-    return res.status(500).json({ error: error.message || 'Failed to generate daily insight.' });
+    return res.status(500).json({
+      error: error.message || 'Failed to generate daily insight.'
+    });
   }
 }
 

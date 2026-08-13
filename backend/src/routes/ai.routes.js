@@ -35,10 +35,15 @@ const upload = multer({
 router.post('/analyze', upload.single('image'), analyzeController.analyze);
 
 /**
- * @route   POST /api/insight
- * @desc    Generate daily personalized wellness insight (receives profile and meals in body)
- * @access  Public (Will be wrapped or integrated by Backend-1 with JWT middleware)
+ * @route   GET /api/insight
+ * @desc    Generate daily personalized wellness insight for the authenticated user.
+ * @access  Protected — Backend-1 must attach JWT auth middleware before this route.
+ *          Backend-1 is responsible for:
+ *            1. Verifying the JWT token and populating req.user
+ *            2. Fetching the user's health profile from DB
+ *            3. Fetching today's logged meals from DB
+ *          Those values are then passed to the AI service by the controller.
  */
-router.post('/insight', analyzeController.getInsight);
+router.get('/insight', analyzeController.getInsight);
 
 module.exports = router;

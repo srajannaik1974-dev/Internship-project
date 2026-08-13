@@ -16,8 +16,8 @@ const { GoogleGenAI } = require('@google/genai');
 const { getFoodAnalysisPrompt, getDailyInsightPrompt } = require('./prompts');
 const { parseAndValidateFoodAnalysis, parseAndValidateDailyInsight } = require('./aiParser');
 
-// Model definition
-const DEFAULT_MODEL = 'gemini-2.0-flash';
+// Model definition — gemini-3.5-flash is the current recommended model for new API keys (Aug 2026)
+const DEFAULT_MODEL = 'gemini-3.5-flash';
 
 // Helper to initialize GoogleGenAI client securely
 function getAiClient() {

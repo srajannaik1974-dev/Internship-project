@@ -19,6 +19,7 @@ const Dashboard = () => {
   const { data: insight, loading: insightLoading } = useApi(getDailyInsight, true);
   const storedUser = getStoredUser();
 
+
   const mealTypes = ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
 
   const getMealForType = (type) => {

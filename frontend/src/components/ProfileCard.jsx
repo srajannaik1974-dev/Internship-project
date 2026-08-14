@@ -3,6 +3,7 @@ import { User, Activity, Heart, Edit3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getStoredUser } from '../services/api';
 
+
 const ProfileCard = ({ profile }) => {
   const navigate = useNavigate();
 

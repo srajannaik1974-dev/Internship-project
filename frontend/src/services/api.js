@@ -220,7 +220,7 @@ export const analyzeFood = async (formData) => {
       };
     }
 
-    const response = await apiClient.post('/analyze-food', body, config);
+    const response = await apiClient.post('/analyze', body, config);
     return response.data;
   } catch (error) {
     console.log('[API Service] Backend unavailable for POST /analyze-food, generating mock analysis.');
@@ -265,7 +265,7 @@ export const analyzeFood = async (formData) => {
  */
 export const getDailyInsight = async () => {
   try {
-    const response = await apiClient.get('/insight/today');
+    const response = await apiClient.get('/insight');
     return response.data;
   } catch (error) {
     return initialDailyInsight;

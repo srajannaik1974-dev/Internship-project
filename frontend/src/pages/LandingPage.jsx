@@ -30,57 +30,48 @@ const LandingPage = () => {
       <section className="landing-hero animate-fade-in">
         <div className="hero-grid">
           {/* Hero Left Content */}
-          <div>
+          <div className="hero-copy">
             <div className="hero-pill-badge">
-              <Sparkles size={14} />
-              <span>AI-powered food wellness</span>
+              
+              <span>There's More to Every Bite.</span>
             </div>
 
             <h1 className="hero-title">
-              Eat <span className="highlight-accent">smarter</span>.<br />
-              Feel better.<br />
-              Every day.
-            </h1>
+  Your plate,
+  <br />
+  finally <span className="highlight-accent">legible.</span>
+</h1>
 
             <p className="hero-subtitle">
-              Understand your food, build healthier habits, and get personalized wellness guidance — all in one simple place.
-            </p>
+No barcode. No guesswork. Snap your real meal — NutriMind reads the plate and hands you honest numbers: protein, carbs, and calories, in seconds.            </p>
 
             <div className="hero-actions">
               <button
                 className="btn btn-primary btn-lg"
                 onClick={() => navigate('/signin')}
               >
-                <span>Get Started</span>
+                <span>Analyze a meal</span>
                 <ArrowRight size={18} />
               </button>
               <button
                 className="btn btn-secondary btn-lg"
                 onClick={() => scrollToSection('features')}
               >
-                Explore NutriMind
+                What's NutriMind
               </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginTop: '2.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <CheckCircle2 size={16} style={{ color: 'var(--primary)' }} />
-                <span>No complex setup</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <CheckCircle2 size={16} style={{ color: 'var(--primary)' }} />
-                <span>Personalized guidance</span>
-              </div>
+            <div className="hero-proof">
+              
+              <strong>Track what's in your meal before Your Next Bite.</strong>
             </div>
           </div>
 
-          {/* Hero Right — Premium Food Visual with floating AI cards */}
+          {/* Hero Right — food video + analysis card */}
           <div className="hero-food-wrapper">
-            {/* Main food photograph */}
             <div className="hero-food-image-container">
-              {/* Ensure the video asset is placed at public/videos/hero-food.mp4 */}
               <video
-                src="/videos/hero-food.mp4"
+                src="/videos/food.mp4"
                 autoPlay
                 loop
                 muted
@@ -88,41 +79,52 @@ const LandingPage = () => {
                 poster="/hero-food-poster.jpg"
                 className="hero-food-video"
               />
-              {/* subtle gradient overlay at the bottom for card readability */}
+
               <div className="hero-food-overlay" />
-            </div>
+               <div className="real-meal-label">
+    REAL MEAL
+  </div>
 
-            {/* Floating Card 1 — AI Analysis result (top-left) */}
-            <div className="hero-float-card hero-float-card--tl animate-float-slow">
-              <div className="hero-float-card__icon hero-float-card__icon--green">
-                <Sparkles size={14} />
+              {/* Top-right status pill */}
+              <div className="hero-meals-pill">
+                <CheckCircle2 size={15} />
+                <span>3 meals logged today</span>
               </div>
-              <div>
-                <p className="hero-float-card__label">AI Food Analysis</p>
-                <p className="hero-float-card__title">Samosa</p>
-                <span className="risk-badge moderate" style={{ fontSize: '0.7rem', padding: '0.15rem 0.55rem', marginTop: '0.2rem', display: 'inline-flex' }}>
-                  Moderate Concern
-                </span>
-              </div>
-            </div>
 
-            {/* Floating Card 2 — Today's Insight (bottom-left) */}
-            <div className="hero-float-card hero-float-card--bl animate-float">
-              <div className="hero-float-card__icon hero-float-card__icon--amber">
-                <Lightbulb size={14} />
-              </div>
-              <div>
-                <p className="hero-float-card__label">Today's Insight</p>
-                <p className="hero-float-card__body">
-                  Add vegetables + a protein source to your next meal.
+              {/* THIS CARD IS INSIDE THE IMAGE CONTAINER */}
+              <div className="hero-analysis-card">
+                <div className="hero-analysis-header">
+                  <div className="hero-analysis-label">
+                    <span className="hero-analysis-dot" />
+                    <span>NUTRIMIND ANALYSIS</span>
+                  </div>
+                  <span className="hero-analysis-match">96% MATCH</span>
+                </div>
+
+                <h3>Your Meal</h3>
+                <p className="hero-analysis-food">
+                  Poke bowl · tofu, salmon, brown rice, greens
                 </p>
-              </div>
-            </div>
 
-            {/* Floating Card 3 — Meals logged pill (top-right) */}
-            <div className="hero-float-pill animate-float-slow" style={{ animationDelay: '1.2s' }}>
-              <CheckCircle2 size={15} style={{ color: 'var(--primary)' }} />
-              <span>3 meals logged today</span>
+                <div className="hero-nutrition-grid">
+                  <div className="hero-nutrition-item">
+                    <strong>38</strong><span>g</span>
+                    <small>PROTEIN</small>
+                  </div>
+                  <div className="hero-nutrition-item">
+                    <strong>52</strong><span>g</span>
+                    <small>CARBS</small>
+                  </div>
+                  <div className="hero-nutrition-item">
+                    <strong>14</strong><span>g</span>
+                    <small>FAT</small>
+                  </div>
+                  <div className="hero-nutrition-item hero-nutrition-kcal">
+                    <strong>490</strong>
+                    <small>KCAL</small>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -275,7 +277,7 @@ const LandingPage = () => {
             <h2 style={{ fontSize: '2.25rem', fontWeight: 800, marginTop: '0.35rem', color: '#ffffff' }}>
               Food advice should be personal.
             </h2>
-            <p style={{ fontSize: '1.05rem', color: 'var(--color-text-secondary)', marginTop: '0.75rem', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '1.05rem', color: '#caa1a0c9', marginTop: '0.75rem', lineHeight: 1.6 }}>
               Your food choices don't exist in isolation. NutriMind considers your health profile, activity levels, and daily food history to make its guidance relevant specifically to you.
             </p>
           </div>
@@ -297,7 +299,7 @@ const LandingPage = () => {
             </div>
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>↓</span>
             <div className="flow-result-node">
-              <Sparkles size={20} style={{ display: 'inline', marginRight: '0.4rem' }} />
+              
               Personalized Guidance
             </div>
           </div>
@@ -343,7 +345,7 @@ const LandingPage = () => {
                 <span className="logo-title">NutriMind</span>
               </div>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                Eat smarter. Feel better. Every day.
+            Small choices. Better habits. A healthier you.
               </p>
             </div>
 
@@ -365,7 +367,7 @@ const LandingPage = () => {
 
           <div className="footer-bottom">
             <span>© 2026 NutriMind. All rights reserved.</span>
-            <span>AI Food & Wellness Assistant — Sprint 1 Frontend</span>
+            <span>AI Food & Wellness Assistant.</span>
           </div>
         </div>
       </footer>

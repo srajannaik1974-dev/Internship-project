@@ -23,8 +23,10 @@ const Navbar = () => {
             <Leaf size={22} />
           </div>
           <div className="logo-text-wrapper">
-            <span className="logo-title">NutriMind</span>
-            <span className="logo-badge">AI Wellness</span>
+            <span className="logo-title">
+  NutriMind<span className="logo-dot"></span>
+</span>
+            
           </div>
         </Link>
 

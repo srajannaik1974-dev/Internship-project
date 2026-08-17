@@ -2,10 +2,10 @@
   "name": "nutrimind-backend",
   "version": "1.0.0",
   "description": "NutriMind backend — Express API + Gemini AI integration",
-  "main": "src/index.js",
-  "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
+  "main": "index.js",
+"scripts": {
+  "dev": "nodemon index.js",
+  "start": "node index.js",
     "test": "jest --detectOpenHandles --forceExit",
     "test:watch": "jest --watch"
   },

@@ -21,7 +21,10 @@ const app = express();
 // Security and Logging Middleware
 app.use(helmet());
 app.use(cors({
-    origin: (origin, callback) => callback(null, true),
+    origin: (origin, callback) => {
+        // Echo back requesting origin string to satisfy browser credentials spec
+        callback(null, origin || 'http://localhost:5173');
+    },
     credentials: true
 }));
 app.use(morgan('dev'));

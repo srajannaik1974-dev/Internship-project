@@ -59,10 +59,17 @@ const FoodDiaryPage = () => {
   const currentISODate = toISODateString(selectedDate);
   const isToday = currentISODate === toISODateString(new Date());
 
+  // Safely extract meals array regardless of backend payload structure ({ success, data: [...] } vs [...])
+  const mealsList = Array.isArray(foodHistory)
+    ? foodHistory
+    : (Array.isArray(foodHistory?.data) ? foodHistory.data : []);
+
   // Filter history by selected date or show all if date matches
-  const filteredMeals = foodHistory
-    ? foodHistory.filter(item => !item.date || item.date === currentISODate)
-    : [];
+  const filteredMeals = mealsList.filter(item => {
+    if (!item) return false;
+    const itemDate = item.createdAt ? item.createdAt.split('T')[0] : (item.date || '');
+    return !itemDate || itemDate === currentISODate;
+  });
 
   return (
     <div className="animate-fade-in">

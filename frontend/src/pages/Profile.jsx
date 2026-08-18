@@ -28,18 +28,19 @@ const Profile = () => {
 
   useEffect(() => {
     const storedUser = getStoredUser();
-    if (profileData) {
+    const p = profileData?.data || profileData;
+    if (p) {
       setFormData({
-        name: profileData.name || profileData.user?.name || storedUser?.name || '',
-        age: profileData.age || '',
-        height: profileData.height || '',
-        weight: profileData.weight || '',
-        activity_level: profileData.activity_level || profileData.activityLevel || 'Active',
-        diet_preference: profileData.diet_preference || profileData.dietaryGoal || 'No Preference',
-        allergies: profileData.allergies || '',
-        dietary_restrictions: profileData.dietary_restrictions || '',
-        health_conditions: profileData.health_conditions || (Array.isArray(profileData.healthConditions) ? profileData.healthConditions.join(', ') : profileData.healthConditions) || '',
-        additional_notes: profileData.additional_notes || ''
+        name: p.name || p.user?.name || storedUser?.name || '',
+        age: p.age ?? '',
+        height: p.height ?? '',
+        weight: p.weight ?? '',
+        activity_level: p.activity_level || p.activityLevel || 'Active',
+        diet_preference: p.diet_preference || p.dietaryGoal || 'No Preference',
+        allergies: p.allergies || '',
+        dietary_restrictions: p.dietary_restrictions || '',
+        health_conditions: p.health_conditions || (Array.isArray(p.healthConditions) ? p.healthConditions.join(', ') : p.healthConditions) || '',
+        additional_notes: p.additional_notes || ''
       });
     } else if (storedUser?.name) {
       setFormData(prev => ({ ...prev, name: storedUser.name }));
@@ -91,7 +92,7 @@ const Profile = () => {
       await updateProfile(formData);
       setSaveSuccess(true);
       setIsEditing(false);
-      fetchProfile();
+      await fetchProfile();
       setTimeout(() => setSaveSuccess(false), 4000);
     } catch (err) {
       console.error('Failed to save profile:', err);

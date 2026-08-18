@@ -100,7 +100,9 @@ export const getCurrentUser = async () => {
 export const getProfile = async () => {
   try {
     const response = await apiClient.get('/profile');
-    return response.data;
+    const data = response.data?.data || response.data;
+    setLocalData('profile', data);
+    return data;
   } catch (error) {
     console.log('[API Service] Backend unavailable for /profile, using fallback mock data.');
     const local = getLocalData('profile', initialMockProfile);
@@ -115,7 +117,9 @@ export const getProfile = async () => {
 export const createProfile = async (profileData) => {
   try {
     const response = await apiClient.post('/profile', profileData);
-    return response.data;
+    const data = response.data?.data || response.data;
+    setLocalData('profile', data);
+    return data;
   } catch (error) {
     console.log('[API Service] Backend unavailable for POST /profile, saving locally.');
     setLocalData('profile', profileData);
@@ -126,13 +130,26 @@ export const createProfile = async (profileData) => {
 export const updateProfile = async (profileData) => {
   try {
     const response = await apiClient.put('/profile', profileData);
-    return response.data;
+    const updated = response.data?.data || response.data;
+    setLocalData('profile', updated);
+    if (profileData.name) {
+      const stored = getStoredUser() || {};
+      stored.name = profileData.name;
+      localStorage.setItem('user', JSON.stringify(stored));
+    }
+    return updated;
   } catch (error) {
     console.log('[API Service] Backend unavailable for PUT /profile, updating locally.');
     setLocalData('profile', profileData);
+    if (profileData.name) {
+      const stored = getStoredUser() || {};
+      stored.name = profileData.name;
+      localStorage.setItem('user', JSON.stringify(stored));
+    }
     return profileData;
   }
 };
+
 
 /**
  * FOOD DIARY API

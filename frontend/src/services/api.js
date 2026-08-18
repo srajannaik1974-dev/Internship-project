@@ -24,6 +24,18 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Axios Response Interceptor to auto-clear stale invalid tokens on 401
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Helper for Mock Fallback Storage in LocalStorage during Standalone Dev
 const getLocalData = (key, fallback) => {
   try {

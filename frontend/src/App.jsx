@@ -24,6 +24,9 @@ const AppShell = ({ userName }) => {
     setDrawerOpen(false);
   }, [location.pathname]);
 
+  const storedUser = getStoredUser();
+  const activeUserName = storedUser?.name || userName || 'User';
+
   const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname);
 
   if (isPublicRoute) {
@@ -38,11 +41,11 @@ const AppShell = ({ userName }) => {
   return (
     <div className="app-layout">
       {/* ── Desktop sidebar (hidden via CSS on mobile) ── */}
-      <Sidebar userName={userName} />
+      <Sidebar userName={activeUserName} />
 
       {/* ── Mobile-only: sticky top header ── */}
       <MobileHeader
-        userName={userName}
+        userName={activeUserName}
         onMenuOpen={() => setDrawerOpen(true)}
       />
 
@@ -50,7 +53,7 @@ const AppShell = ({ userName }) => {
       <MobileDrawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        userName={userName}
+        userName={activeUserName}
       />
 
       {/* ── Main page content ── */}

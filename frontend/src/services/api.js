@@ -67,9 +67,8 @@ export const registerUser = async (userData) => {
   if (response.data?.token) {
     localStorage.setItem('token', response.data.token);
   }
-  if (response.data?.data) {
-    localStorage.setItem('user', JSON.stringify(response.data.data));
-  }
+  const userObj = response.data?.data || response.data?.user || { name: userData.name, email: userData.email };
+  localStorage.setItem('user', JSON.stringify(userObj));
   localStorage.removeItem('nutrimind_profile');
   return response.data;
 };
@@ -79,8 +78,9 @@ export const loginUser = async (credentials) => {
   if (response.data?.token) {
     localStorage.setItem('token', response.data.token);
   }
-  if (response.data?.data) {
-    localStorage.setItem('user', JSON.stringify(response.data.data));
+  const userObj = response.data?.data || response.data?.user;
+  if (userObj) {
+    localStorage.setItem('user', JSON.stringify(userObj));
   }
   localStorage.removeItem('nutrimind_profile');
   return response.data;

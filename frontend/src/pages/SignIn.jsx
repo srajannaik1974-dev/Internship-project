@@ -33,7 +33,8 @@ const SignIn = () => {
       navigate('/dashboard');
     } catch (err) {
       console.error('Auth error:', err);
-      const msg = err.response?.data?.message || (err.response?.data?.errors && err.response.data.errors[0]?.message) || err.message || 'Authentication failed. Please check your credentials.';
+      const fieldError = err.response?.data?.errors?.[0]?.message || err.response?.data?.errors?.[0]?.msg;
+      const msg = fieldError || err.response?.data?.message || err.message || 'Authentication failed. Please check your credentials.';
       setError(msg);
     } finally {
       setLoading(false);

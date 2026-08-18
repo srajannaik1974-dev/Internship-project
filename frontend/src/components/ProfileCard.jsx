@@ -11,14 +11,16 @@ const ProfileCard = ({ profile }) => {
 
   const storedUser = getStoredUser();
 
-  const {
-    name = profile?.user?.name || storedUser?.name || 'User',
-    age = profile?.age || '--',
-    height = profile?.height || '--',
-    weight = profile?.weight || '--',
-    activity_level = profile?.activity_level || profile?.activityLevel || 'Active',
-    diet_preference = profile?.diet_preference || profile?.dietaryGoal || 'No Preference'
-  } = profile;
+  // Unpack payload if nested under response.data
+  const p = profile?.data || profile;
+
+  const name = p?.name || p?.user?.name || storedUser?.name || 'User';
+  const age = (p?.age !== null && p?.age !== undefined && p?.age !== '') ? p.age : '--';
+  const height = (p?.height !== null && p?.height !== undefined && p?.height !== '') ? p.height : '--';
+  const weight = (p?.weight !== null && p?.weight !== undefined && p?.weight !== '') ? p.weight : '--';
+  const activity_level = p?.activity_level || p?.activityLevel || 'Active';
+  const diet_preference = p?.diet_preference || p?.dietaryGoal || 'No Preference';
+
 
   return (
     <div className="card" style={{ padding: '1.25rem', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>

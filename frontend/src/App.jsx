@@ -80,15 +80,17 @@ function App() {
     // 1. Try getCurrentUser from auth endpoint
     getCurrentUser()
       .then(res => {
-        if (res?.data?.name) {
-          setUserName(res.data.name);
+        const u = res?.data || res;
+        if (u?.name) {
+          setUserName(u.name);
         }
       })
       .catch(() => {
         // 2. Fallback to profile
         getProfile()
           .then(res => {
-            const name = res?.data?.name || res?.name;
+            const p = res?.data || res;
+            const name = p?.name || p?.user?.name;
             if (name) setUserName(name);
           })
           .catch(() => {});

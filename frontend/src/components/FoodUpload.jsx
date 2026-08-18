@@ -1,16 +1,17 @@
 import React, { useRef } from 'react';
-import { UploadCloud, Image as ImageIcon, X, RefreshCw } from 'lucide-react';
+import { Upload, Camera, X } from 'lucide-react';
 
-const FoodUpload = ({ imageFile, imagePreview, setImageFile, setImagePreview }) => {
+const FoodUpload = ({
+  imageFile,
+  imagePreview,
+  setImageFile,
+  setImagePreview
+}) => {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (!file.type.match('image.*')) {
-        alert('Please upload a valid image file (PNG, JPG, JPEG, WEBP).');
-        return;
-      }
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -20,8 +21,7 @@ const FoodUpload = ({ imageFile, imagePreview, setImageFile, setImagePreview }) 
     }
   };
 
-  const handleRemoveImage = (e) => {
-    e.stopPropagation();
+  const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview(null);
     if (fileInputRef.current) {
@@ -32,100 +32,73 @@ const FoodUpload = ({ imageFile, imagePreview, setImageFile, setImagePreview }) 
   return (
     <div className="form-group">
       <label className="form-label">
-        Upload Food Image (Optional)
+        Optional Food Image
       </label>
-
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/png, image/jpeg, image/jpg, image/webp"
-        style={{ display: 'none' }}
+        accept="image/*"
         onChange={handleFileChange}
-        id="food-image-input"
+        style={{ display: 'none' }}
       />
 
-      {imagePreview ? (
-        <div style={{
-          position: 'relative',
-          borderRadius: 'var(--radius-md)',
-          overflow: 'hidden',
-          border: '1px solid var(--border-color)',
-          maxHeight: '260px',
-          backgroundColor: '#000000'
-        }}>
-          <img
-            src={imagePreview}
-            alt="Food Preview"
-            style={{
-              width: '100%',
-              height: '240px',
-              objectFit: 'cover',
-              display: 'block'
-            }}
-          />
-          <div style={{
-            position: 'absolute',
-            top: '0.75rem',
-            right: '0.75rem',
-            display: 'flex',
-            gap: '0.5rem'
-          }}>
-            <button
-              type="button"
-              className="btn btn-sm btn-secondary"
-              onClick={() => fileInputRef.current?.click()}
-              title="Change image"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(4px)' }}
-            >
-              <RefreshCw size={14} />
-              <span>Change</span>
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-danger"
-              onClick={handleRemoveImage}
-              title="Remove image"
-              style={{ backgroundColor: 'rgba(254, 242, 242, 0.9)', backdropFilter: 'blur(4px)' }}
-            >
-              <X size={14} />
-              <span>Remove</span>
-            </button>
-          </div>
-        </div>
-      ) : (
+      {!imagePreview ? (
         <div
           onClick={() => fileInputRef.current?.click()}
           style={{
             border: '2px dashed var(--border-color)',
             borderRadius: 'var(--radius-md)',
-            padding: '2rem 1.5rem',
+            padding: '1.5rem',
             textAlign: 'center',
             cursor: 'pointer',
-            backgroundColor: 'var(--color-surface)',
-            transition: 'all var(--transition-fast)'
+            backgroundColor: 'var(--bg-subtle)',
+            transition: 'border-color 0.2s ease'
           }}
-          onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.backgroundColor = 'var(--color-primary-soft)'; }}
-          onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.backgroundColor = 'var(--color-surface)'; }}
         >
-          <div style={{
-            width: '44px',
-            height: '44px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--primary-light)',
-            color: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 0.75rem auto'
-          }}>
-            <UploadCloud size={24} />
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>
+            <Camera size={24} />
+            <Upload size={24} />
           </div>
-          <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>
-            Click to upload or drag & drop a photo
+          <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-main)' }}>
+            Upload or capture photo of your meal
           </p>
-          <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-            Supports PNG, JPG, JPEG or WEBP (Max 5MB)
+          <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)' }}>
+            Supports JPG, PNG, WEBP
           </p>
+        </div>
+      ) : (
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <img
+            src={imagePreview}
+            alt="Food preview"
+            style={{
+              width: '100%',
+              maxHeight: '220px',
+              objectFit: 'cover',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)'
+            }}
+          />
+          <button
+            type="button"
+            onClick={handleRemoveImage}
+            style={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              color: '#fff',
+              borderRadius: '50%',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <X size={16} />
+          </button>
         </div>
       )}
     </div>

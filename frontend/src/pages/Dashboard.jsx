@@ -18,20 +18,26 @@ const Dashboard = () => {
   const { data: todaysMeals, loading: mealsLoading, error: mealsError, execute: refreshMeals } = useApi(getTodaysFood, true);
   const { data: insight, loading: insightLoading } = useApi(getDailyInsight, true);
   const storedUser = getStoredUser();
+  const userName = profile?.name || profile?.user?.name || storedUser?.name || 'User';
 
 
   const mealTypes = ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
 
+  const mealsList = Array.isArray(todaysMeals)
+    ? todaysMeals
+    : Array.isArray(todaysMeals?.data)
+    ? todaysMeals.data
+    : [];
+
   const getMealForType = (type) => {
-    if (!todaysMeals) return null;
-    return todaysMeals.find(m => (m.meal_type || '').toLowerCase() === type.toLowerCase());
+    return mealsList.find(m => (m.meal_type || m.mealType || m.type || '').toLowerCase() === type.toLowerCase()) || null;
   };
 
-  const loggedCount = todaysMeals ? todaysMeals.length : 0;
+  const loggedCount = mealsList.length;
 
   return (
     <div className="animate-fade-in">
-      <Header userName={profile?.name || storedUser?.name || 'User'} />
+      <Header userName={userName} />
 
       {/* Profile Overview Banner */}
       {profileLoading ? (
@@ -120,7 +126,7 @@ const Dashboard = () => {
                     {type}
                   </p>
                   <p style={{ fontSize: '0.75rem', color: isLogged ? 'var(--color-primary)' : 'var(--text-light)' }}>
-                    {isLogged ? (loggedMeal.food_name || 'Logged') : 'Not logged'}
+                    {isLogged ? (loggedMeal.food_name || loggedMeal.name || 'Logged') : 'Not logged'}
                   </p>
                 </div>
               </div>
@@ -134,7 +140,7 @@ const Dashboard = () => {
         <LoadingState message="Loading today's logged meals..." />
       ) : mealsError ? (
         <ErrorState message={mealsError} onRetry={refreshMeals} />
-      ) : !todaysMeals || todaysMeals.length === 0 ? (
+      ) : mealsList.length === 0 ? (
         <EmptyState
           title="No meals logged today"
           description="You haven't logged any meals yet today. Click below to analyze and log your food."
@@ -143,7 +149,7 @@ const Dashboard = () => {
         />
       ) : (
         <div className="grid-3">
-          {todaysMeals.map((meal) => (
+          {mealsList.map((meal) => (
             <MealCard
               key={meal.id || meal._id}
               meal={meal}

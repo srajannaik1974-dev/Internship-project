@@ -70,6 +70,7 @@ export const registerUser = async (userData) => {
   if (response.data?.data) {
     localStorage.setItem('user', JSON.stringify(response.data.data));
   }
+  localStorage.removeItem('nutrimind_profile');
   return response.data;
 };
 
@@ -81,6 +82,7 @@ export const loginUser = async (credentials) => {
   if (response.data?.data) {
     localStorage.setItem('user', JSON.stringify(response.data.data));
   }
+  localStorage.removeItem('nutrimind_profile');
   return response.data;
 };
 
@@ -101,7 +103,12 @@ export const getProfile = async () => {
     return response.data;
   } catch (error) {
     console.log('[API Service] Backend unavailable for /profile, using fallback mock data.');
-    return getLocalData('profile', initialMockProfile);
+    const local = getLocalData('profile', initialMockProfile);
+    const storedUser = getStoredUser();
+    if (storedUser?.name) {
+      local.name = storedUser.name;
+    }
+    return local;
   }
 };
 
@@ -271,3 +278,9 @@ export const getDailyInsight = async () => {
     return initialDailyInsight;
   }
 };
+
+// Aliases for page compatibility
+export const getFoods = getFoodHistory;
+export const deleteFood = deleteFoodEntry;
+export const createFood = createFoodEntry;
+

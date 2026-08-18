@@ -30,9 +30,13 @@ const getProfile = async (req, res, next) => {
             });
         }
 
+        const profileData = profile.toObject();
+        profileData.name = profile.user ? profile.user.name : req.user.name;
+        profileData.email = profile.user ? profile.user.email : req.user.email;
+
         res.status(200).json({
             success: true,
-            data: profile
+            data: profileData
         });
     } catch (error) {
         next(error);
@@ -77,16 +81,24 @@ const updateProfile = async (req, res, next) => {
             dailyCalorieTarget: dailyCalorieTarget || 2000
         };
 
+        if (req.body.name) {
+            await User.findByIdAndUpdate(req.user._id, { name: req.body.name });
+        }
+
         const profile = await Profile.findOneAndUpdate(
             { user: req.user._id },
             { $set: profileFields },
             { returnDocument: 'after', upsert: true, runValidators: true }
         ).populate('user', 'name email');
 
+        const profileData = profile.toObject();
+        profileData.name = req.body.name || (profile.user ? profile.user.name : req.user.name);
+        profileData.email = profile.user ? profile.user.email : req.user.email;
+
         res.status(200).json({
             success: true,
             message: 'Profile updated successfully',
-            data: profile
+            data: profileData
         });
     } catch (error) {
         next(error);

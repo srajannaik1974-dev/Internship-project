@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Sparkles, BookOpen, User, Leaf } from 'lucide-react';
 
-const Sidebar = ({ userName = 'User' }) => {
+const Sidebar = () => {
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Log Food', path: '/analyze', icon: Sparkles },

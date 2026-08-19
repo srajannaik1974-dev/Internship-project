@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Leaf, Eye, EyeOff, ArrowRight, Lock, Mail, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Leaf, Eye, EyeOff, ArrowRight, Lock, Mail } from 'lucide-react';
 import { registerUser, loginUser } from '../services/api';
 
 const SignIn = () => {
@@ -14,6 +14,18 @@ const SignIn = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [flipDirection, setFlipDirection] = useState('');
+  const [isFlipping, setIsFlipping] = useState(false);
+
+  const switchMode = (nextMode) => {
+    if (isFlipping || nextMode === isSignUp) return;
+    setFlipDirection(nextMode ? 'flip-forward' : 'flip-back');
+    setIsSignUp(nextMode);
+    setIsFlipping(true);
+    window.setTimeout(() => {
+      setIsFlipping(false);
+    }, 850);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,80 +55,9 @@ const SignIn = () => {
 
   return (
     <div className="signin-page-container">
-      {/* LEFT VISUAL SIDE (Desktop) */}
-      <div className="signin-visual-side">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: 'var(--radius-md)',
-            backgroundColor: 'var(--color-surface)',
-            color: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-          }}>
-            <Leaf size={24} />
-          </div>
-          <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text)', letterSpacing: '-0.02em' }}>
-            NutriMind
-          </span>
-        </div>
-
-        <div style={{ maxWidth: '440px', margin: 'auto 0' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.3rem 0.75rem',
-            borderRadius: 'var(--radius-full)',
-            backgroundColor: 'rgba(255, 255, 255, 0.45)',
-            color: 'var(--color-text)',
-            backdropFilter: 'blur(8px)',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            marginBottom: '1.25rem'
-          }}>
-            <Sparkles size={14} />
-            <span>AI Wellness Assistant</span>
-          </div>
-
-          <h1 style={{ fontSize: '2.75rem', fontWeight: 800, lineHeight: 1.15, marginBottom: '1rem', letterSpacing: '-0.02em', color: 'var(--color-text)' }}>
-            Your food.<br />
-            Your wellness.<br />
-            Your journey.
-          </h1>
-
-          <p style={{ fontSize: '1.05rem', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '2rem' }}>
-            Join thousands of users making smarter, everyday food choices with simple AI guidance.
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
-              <CheckCircle2 size={18} style={{ color: 'var(--color-primary)' }} />
-              <span>Instant AI meal analysis & Risk Badging</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
-              <CheckCircle2 size={18} style={{ color: 'var(--color-primary)' }} />
-              <span>Personalized health guidance</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
-              <CheckCircle2 size={18} style={{ color: 'var(--color-primary)' }} />
-              <span>Comprehensive food history diary</span>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-          © 2026 NutriMind. All rights reserved.
-        </div>
-      </div>
-
-      {/* RIGHT FORM SIDE */}
       <div className="signin-form-side">
-        <div className="signin-card animate-fade-in">
-          {/* Header Mobile Brand */}
+        <div className={`signin-card animate-fade-in ${flipDirection}`}>
+          <div className={`signin-card-content ${isFlipping ? 'is-hidden' : ''}`}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
             <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div style={{
@@ -279,7 +220,7 @@ const SignIn = () => {
               <span>
                 Already have an account?{' '}
                 <button
-                  onClick={() => setIsSignUp(false)}
+                  onClick={() => switchMode(false)}
                   style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer' }}
                 >
                   Sign In
@@ -289,7 +230,7 @@ const SignIn = () => {
               <span>
                 Don't have an account?{' '}
                 <button
-                  onClick={() => setIsSignUp(true)}
+                  onClick={() => switchMode(true)}
                   style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer' }}
                 >
                   Get Started
@@ -299,6 +240,14 @@ const SignIn = () => {
           </div>
         </div>
       </div>
+      {isFlipping && (
+        <div className="auth-transition-overlay" aria-live="polite">
+          <div className="auth-transition-logo"><Leaf size={34} /></div>
+          <strong>NutriMind</strong>
+          <span>There's More to Every Bite.</span>
+        </div>
+      )}
+        </div>
     </div>
   );
 };

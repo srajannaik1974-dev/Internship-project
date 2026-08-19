@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import FoodInput from '../components/FoodInput';
 import FoodUpload from '../components/FoodUpload';
 import FoodAnalysisCard from '../components/FoodAnalysisCard';
@@ -11,8 +12,9 @@ import tomatoImg from '../assets/tomato_slice.png';
 import bowlImg from '../assets/curry_bowl.png';
 
 const AnalyzeFood = () => {
+  const location = useLocation();
   const [foodDescription, setFoodDescription] = useState('');
-  const [mealType, setMealType] = useState('Breakfast');
+  const [mealType, setMealType] = useState(location.state?.mealType || 'Breakfast');
   const [quantity, setQuantity] = useState('1 serving');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);

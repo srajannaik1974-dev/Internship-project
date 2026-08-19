@@ -1,27 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
-import DailyInsight from '../components/DailyInsight';
 import MealCard from '../components/MealCard';
-import ProfileCard from '../components/ProfileCard';
-import LoadingState from '../components/LoadingState';
-import ErrorState from '../components/ErrorState';
-import EmptyState from '../components/EmptyState';
 import { useApi } from '../hooks/useApi';
-import { getProfile, getTodaysFood, getDailyInsight, getStoredUser } from '../services/api';
-import { PlusCircle, Utensils, CheckCircle, Clock } from 'lucide-react';
+import { getTodaysFood, getStoredUser } from '../services/api';
+import { Plus, Utensils, CheckCircle2, ArrowUpRight, Sunrise, Sun, Cookie, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [skippedMeals, setSkippedMeals] = useState([]);
+  const [selectedMeal, setSelectedMeal] = useState('');
 
-  const { data: profile, loading: profileLoading, error: profileError } = useApi(getProfile, true);
-  const { data: todaysMeals, loading: mealsLoading, error: mealsError, execute: refreshMeals } = useApi(getTodaysFood, true);
-  const { data: insight, loading: insightLoading } = useApi(getDailyInsight, true);
+  const { data: todaysMeals, loading: mealsLoading } = useApi(getTodaysFood, true);
   const storedUser = getStoredUser();
-  const userName = profile?.name || profile?.user?.name || storedUser?.name || 'User';
+  const userName = storedUser?.name || 'there';
 
 
-  const mealTypes = ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
+  const mealTypes = [
+    { name: 'Breakfast', icon: Sunrise, color: 'morning' },
+    { name: 'Lunch', icon: Sun, color: 'midday' },
+    { name: 'Snack', icon: Cookie, color: 'snack' },
+    { name: 'Dinner', icon: Moon, color: 'evening' }
+  ];
 
   const mealsList = Array.isArray(todaysMeals)
     ? todaysMeals
@@ -33,131 +33,94 @@ const Dashboard = () => {
     return mealsList.find(m => (m.meal_type || m.mealType || m.type || '').toLowerCase() === type.toLowerCase()) || null;
   };
 
+  const handleMealOption = (option, name) => {
+    if (option === 'skip') {
+      setSkippedMeals((current) => current.includes(name) ? current : [...current, name]);
+    }
+    if (mealTypes.some(({ name: mealName }) => mealName === option)) {
+      setSelectedMeal(option);
+    }
+  };
+
   const loggedCount = mealsList.length;
+  const nextMeal = mealTypes.find(({ name }) => !getMealForType(name) && !skippedMeals.includes(name))?.name || 'All meals handled';
+  const progress = Math.round(((loggedCount + skippedMeals.length) / mealTypes.length) * 100);
 
   return (
-    <div className="animate-fade-in">
+    <div className="dashboard-meals-page animate-fade-in">
       <Header userName={userName} />
 
-      {/* Profile Overview Banner */}
-      {profileLoading ? (
-        <LoadingState message="Loading your wellness profile..." />
-      ) : profileError ? (
-        <ErrorState message="Could not load profile. Using local mode." />
-      ) : (
-        <div style={{ marginBottom: '1.75rem' }}>
-          <ProfileCard profile={profile} />
-        </div>
-      )}
-
-      {/* Today's Insight Widget */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <DailyInsight insight={insight} />
-      </div>
-
-      {/* Today's Meal Summary Header & Quick Action */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        marginBottom: '1.25rem'
-      }}>
+      <section className="dashboard-meals-hero">
         <div>
-          <h2 className="h2-heading" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Utensils size={20} style={{ color: 'var(--primary)' }} />
-            <span>Today's Meals</span>
-            <span style={{
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              backgroundColor: 'var(--primary-light)',
-              color: 'var(--primary)',
-              padding: '0.2rem 0.65rem',
-              borderRadius: 'var(--radius-full)'
-            }}>
-              {loggedCount} Logged
-            </span>
-          </h2>
-          <p className="subtitle">
-            Track your daily nutrition timeline and wellness statuses.
-          </p>
+          <p className="dashboard-kicker"><Utensils size={15} /> TODAY, {new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }).toUpperCase()}</p>
+          <h1>Today's meals</h1>
+          <p className="dashboard-meals-copy">Keep your day visible, one meal at a time.</p>
+        </div>
+        <div className="dashboard-hero-side">
+          <div className="dashboard-hero-action">
+            <div className="dashboard-next-meal">
+              <span>Next up:</span>
+              <select aria-label="Select meal to log" value={selectedMeal} disabled={nextMeal === 'All meals handled'} onChange={(event) => handleMealOption(event.target.value, nextMeal)}>
+                <option value="" disabled>Choose</option>
+                {mealTypes.map(({ name }) => <option value={name} key={name}>{name}</option>)}
+                <option value="skip">Skip meal</option>
+              </select>
+            </div>
+            <button className="btn btn-primary dashboard-log-button" onClick={() => navigate('/analyze', { state: { mealType: selectedMeal || nextMeal } })} disabled={nextMeal === 'All meals handled'}>
+              <Plus size={18} /> Log meal
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="dashboard-meal-board">
+        <div className="dashboard-board-heading">
+          <div>
+            <h2><span className="dashboard-heading-mark"><Utensils size={16} /></span>Meal timeline</h2>
+            <p>{loggedCount === 0 ? 'Nothing logged yet. Start with your next bite.' : `${loggedCount} meal${loggedCount === 1 ? '' : 's'} logged today.`}</p>
+          </div>
+          <span className="dashboard-count">{loggedCount}/4</span>
         </div>
 
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate('/analyze')}
-        >
-          <PlusCircle size={18} />
-          <span>+ Log Food</span>
-        </button>
-      </div>
+        <div className="dashboard-progress-wrap">
+          <div className="dashboard-progress-labels"><span>Daily rhythm</span><strong>{progress}% complete</strong></div>
+          <div className="dashboard-progress-track"><span style={{ width: `${progress}%` }} /></div>
+        </div>
 
-      {/* Meal Type Progress Tracker */}
-      <div className="card" style={{ marginBottom: '1.5rem', padding: '1.25rem' }}>
-        <p style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.85rem' }}>
-          Meals Logged Today
-        </p>
-        <div className="grid-4" style={{ gap: '0.75rem' }}>
-          {mealTypes.map((type) => {
-            const loggedMeal = getMealForType(type);
-            const isLogged = !!loggedMeal;
+        <div className="dashboard-meal-slots">
+          {mealTypes.map(({ name, icon: MealIcon, color }) => {
+            const loggedMeal = getMealForType(name);
+            const isSkipped = skippedMeals.includes(name) && !loggedMeal;
             return (
-              <div
-                key={type}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.6rem',
-                  padding: '0.75rem 0.85rem',
-                  borderRadius: 'var(--radius-md)',
-                  backgroundColor: isLogged ? 'var(--primary-light)' : 'var(--bg-subtle)',
-                  border: isLogged ? '1px solid var(--color-primary-soft)' : '1px solid var(--border-color)',
-                  color: isLogged ? 'var(--primary)' : 'var(--text-muted)'
-                }}
-              >
-                {isLogged ? (
-                  <CheckCircle size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
-                ) : (
-                  <Clock size={18} style={{ color: 'var(--text-light)', flexShrink: 0 }} />
-                )}
-                <div>
-                  <p style={{ fontSize: '0.875rem', fontWeight: 700, color: isLogged ? 'var(--primary)' : 'var(--text-main)' }}>
-                    {type}
-                  </p>
-                  <p style={{ fontSize: '0.75rem', color: isLogged ? 'var(--color-primary)' : 'var(--text-light)' }}>
-                    {isLogged ? (loggedMeal.food_name || loggedMeal.name || 'Logged') : 'Not logged'}
-                  </p>
+              <div className={`dashboard-meal-slot dashboard-meal-slot--${color} ${loggedMeal ? 'is-logged' : ''} ${isSkipped ? 'is-skipped' : ''}`} key={name}>
+                <div className="dashboard-meal-slot__icon">
+                  <MealIcon size={18} />
                 </div>
+                <div>
+                  <strong>{name}</strong>
+                  <span>{loggedMeal ? (loggedMeal.food_name || loggedMeal.name || 'Logged meal') : isSkipped ? 'Skipped today' : 'Ready to log'}</span>
+                </div>
+                <span className="dashboard-meal-slot__status">{loggedMeal ? <CheckCircle2 size={15} /> : isSkipped ? '—' : null}</span>
               </div>
             );
           })}
         </div>
-      </div>
 
-      {/* Detailed Meal Cards Grid */}
-      {mealsLoading ? (
-        <LoadingState message="Loading today's logged meals..." />
-      ) : mealsError ? (
-        <ErrorState message={mealsError} onRetry={refreshMeals} />
-      ) : mealsList.length === 0 ? (
-        <EmptyState
-          title="No meals logged today"
-          description="You haven't logged any meals yet today. Click below to analyze and log your food."
-          actionText="Log Your First Meal"
-          actionLink="/analyze"
-        />
-      ) : (
-        <div className="grid-3">
-          {mealsList.map((meal) => (
-            <MealCard
-              key={meal.id || meal._id}
-              meal={meal}
-              onClick={() => navigate('/diary')}
-            />
-          ))}
-        </div>
-      )}
+        {mealsLoading ? (
+          <div className="dashboard-meal-empty">Loading today’s meals...</div>
+        ) : mealsList.length === 0 ? (
+          <div className="dashboard-meal-empty dashboard-meal-empty--ready">
+            <div className="dashboard-empty-icon"><Utensils size={22} /></div>
+            <h3>Your day starts here</h3>
+            <p>Log breakfast, lunch, a snack, or dinner to build today’s meal timeline.</p>
+            <div className="dashboard-empty-link"><ArrowUpRight size={15} /> Your next meal will appear here</div>
+          </div>
+        ) : (
+          <div className="dashboard-logged-meals">
+            {mealsList.map((meal) => <MealCard key={meal.id || meal._id} meal={meal} onClick={() => navigate('/diary')} />)}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

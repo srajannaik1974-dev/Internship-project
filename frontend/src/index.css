@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root {
-  /* Color Palette - Premium Wellness SaaS */
-  --color-bg: #F7F3EA;
-  --color-surface: #FFFDF8;
-  --color-text: #211D1A;
-  --color-text-secondary: #6F6860;
-  --color-primary: #F47C45;
-  --color-primary-hover: #E96832;
-  --color-primary-soft: #FCE3D4;
-  --color-border: #E7DED2;
-  --color-success: #5D8A62;
+  /* Color Palette - Premium Warm Food & Wellness SaaS */
+  --color-bg: #FFF8F5;
+  --color-surface: #FFFFFF;
+  --color-text: #1F2937;
+  --color-text-secondary: #6B7280;
+  --color-primary: #FF5722;
+  --color-primary-hover: #E64A19;
+  --color-primary-soft: #FFF0EB;
+  --color-border: #F3E5DC;
+  --color-success: #10B981;
 
   --bg-app: var(--color-bg);
   --bg-card: var(--color-surface);
@@ -1542,3 +1542,47 @@ body {
     gap: 0.35rem !important;
   }
 }
+
+/* ==================================================
+   LOG FOOD PAGE RESPONSIVE & DECORATIVE STYLES
+   ================================================== */
+@media (max-width: 768px) {
+  .log-food-header-row {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 1rem !important;
+  }
+  
+  .ai-info-card {
+    align-self: flex-start;
+  }
+
+  .meal-inputs-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .tips-layout {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+
+  .tips-items-grid {
+    grid-template-columns: 1fr !important;
+    width: 100%;
+  }
+
+  .decorative-food-left {
+    display: none;
+  }
+
+  .decorative-food-right {
+    display: none;
+  }
+
+  .log-food-main-card {
+    padding: 1.5rem !important;
+    border-radius: 18px !important;
+  }
+}
+

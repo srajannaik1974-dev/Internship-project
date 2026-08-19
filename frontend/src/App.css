@@ -1,184 +1,513 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
+/* ============================================================
+   NUTRIMIND — LOG FOOD PAGE
+   Premium Warm Food & Wellness UI
+   No-scroll desktop layout · Proper z-index layering
+   ============================================================ */
 
-  &:hover {
-    border-color: var(--accent-border);
+/* ── ROOT VARIABLES ── */
+:root {
+  --nm-orange:       #FF5A1F;
+  --nm-orange-dark:  #F4511E;
+  --nm-orange-light: #FFF0E9;
+  --nm-orange-soft:  #FFF8F3;
+
+  --nm-cream:     #FFF8F3;
+  --nm-white:     #ffffff;
+  --nm-text:      #171717;
+  --nm-muted:     #6b7280;
+  --nm-border:    #EAD9D0;
+  --nm-border-lo: #F3E5DC;
+
+  --nm-shadow-sm: 0 2px 10px rgba(45,27,18,0.05);
+  --nm-shadow-md: 0 8px 28px rgba(45,27,18,0.08);
+
+  /* aliases for index.css compatibility */
+  --primary:       #FF5A1F;
+  --primary-light: #FFF0E9;
+  --primary-glow:  rgba(255,90,31,0.15);
+}
+
+/* ── GLOBAL RESET ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--nm-cream);
+  color: var(--nm-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea { font: inherit; }
+
+/* ============================================================
+   DESKTOP NO-SCROLL SHELL
+   Forces the entire app to fit inside 100vh on desktop
+   ============================================================ */
+@media (min-width: 1024px) {
+  .app-layout {
+    height: 100vh;
+    overflow: hidden;
   }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+
+  .main-wrapper {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* page-content scrolls internally if ever needed,
+     but the Log Food page is designed to fit without it */
+  .page-content {
+    height: 100%;
+    padding: 1.25rem 1.75rem;
+    overflow-y: auto;
   }
 }
 
-.hero {
-  position: relative;
+/* ============================================================
+   LOG FOOD PAGE — OUTER SHELL
+   ============================================================ */
 
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
-}
-
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
-
-.ticks {
+/* Page wrapper — relative context for decorative images */
+.lf-page {
   position: relative;
   width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  /* Clip decorative images so they never bleed into sidebar */
+  overflow: hidden;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+/* ── Decorative food images ── */
+.lf-deco-inline {
+  pointer-events: none !important;
+  user-select: none;
+  opacity: 1;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 16px rgba(45, 27, 18, 0.08);
+  flex-shrink: 0;
+}
+
+.lf-deco-left,
+.lf-deco-right {
+  width: 76px;
+  height: 76px;
+}
+
+/* Inner content */
+.lf-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* ============================================================
+   HEADING BLOCK
+   ============================================================ */
+.lf-heading-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.15rem;
+  margin-bottom: 0.25rem;
+}
+
+.lf-heading-text {
+  flex: 1;
+  padding: 0 1.25rem;
+}
+
+.lf-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--nm-text);
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.lf-title-icon {
+  color: var(--nm-orange);
+  flex-shrink: 0;
+}
+
+.lf-subtitle {
+  margin: 0.3rem 0 0;
+  font-size: 0.9rem;
+  color: var(--nm-muted);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   MAIN FORM CARD
+   ============================================================ */
+.lf-card {
+  background: var(--nm-white);
+  border: 1px solid var(--nm-border-lo);
+  border-radius: 22px;
+  padding: 1.35rem 1.75rem;
+  box-shadow: var(--nm-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lf-loading-card {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+/* ── Input / Select inside the form card ── */
+.lf-card input,
+.lf-card select,
+.lf-card textarea {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--nm-border);
+  border-radius: 11px;
+  background: #fff;
+  color: var(--nm-text);
+  outline: none;
+  padding: 10px 14px;
+  font-size: 0.925rem;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.lf-card input:focus,
+.lf-card select:focus,
+.lf-card textarea:focus {
+  border-color: var(--nm-orange);
+  box-shadow: 0 0 0 3px rgba(255,90,31,0.09);
+}
+
+.lf-card input[type="file"] {
+  border: none; padding: 0; min-height: auto;
+}
+
+/* ── Labels inside form card ── */
+.lf-card label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--nm-text);
+}
+
+/* ── Override index.css form-group margin inside card ── */
+.lf-card .form-group {
+  margin-bottom: 0;
+}
+
+/* ── FoodInput internal flex gap (compact) ── */
+.lf-card > div:first-child {
+  gap: 0.85rem !important;
+}
+
+/* ── Meal+Qty grid gap (compact) ── */
+.lf-card .meal-inputs-grid {
+  gap: 1rem !important;
+}
+
+/* ── Submit button ── */
+.lf-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  background: var(--nm-orange);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  box-shadow: 0 6px 18px rgba(255,90,31,0.28);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.lf-submit-btn:hover {
+  background: var(--nm-orange-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(255,90,31,0.34);
+}
+
+.lf-submit-btn:active { transform: translateY(0); }
+
+.lf-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ============================================================
+   FOOD UPLOAD — CAMERA BOX
+   ============================================================ */
+.fu-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.fu-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--nm-text);
+}
+
+/* Camera click area */
+.fu-camera-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 2px dashed #F0C8A8;
+  border-radius: 14px;
+  padding: 1.1rem 1rem;
+  cursor: pointer;
+  background: #FFFAF6;
+  transition: border-color 0.18s ease, background 0.18s ease;
+  text-align: center;
+}
+
+.fu-camera-box:hover {
+  border-color: var(--nm-orange);
+  background: #FFF5EE;
+}
+
+.fu-camera-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--nm-orange-light);
+  color: var(--nm-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fu-camera-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--nm-text);
+  margin: 0;
+}
+
+.fu-camera-sub {
+  font-size: 0.78rem;
+  color: var(--nm-muted);
+  margin: 0;
+}
+
+/* Image preview */
+.fu-preview-box {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--nm-border);
+  background: #000;
+  max-height: 200px;
+}
+
+.fu-preview-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.fu-preview-actions {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.fu-action-btn {
+  backdrop-filter: blur(4px);
+  background: rgba(255,255,255,0.92) !important;
+  border-radius: 7px !important;
+}
+
+/* Privacy note */
+.fu-privacy {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.77rem;
+  color: var(--nm-muted);
+  font-weight: 500;
+}
+
+/* ============================================================
+   TIPS SECTION
+   ============================================================ */
+.lf-tips {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: linear-gradient(90deg, #FFF4EE, #FFF8F4);
+  border: 1px solid #F0DDD3;
+  border-radius: 16px;
+  padding: 0.85rem 1.25rem;
+}
+
+.lf-tips-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--nm-text);
+  white-space: nowrap;
+  min-width: 130px;
+}
+
+.lf-tips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  flex: 1;
+}
+
+.lf-tip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.lf-tip-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--nm-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.lf-tip strong {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--nm-text);
+  line-height: 1.2;
+}
+
+.lf-tip p {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: var(--nm-muted);
+  line-height: 1.3;
+}
+
+/* ============================================================
+   RESULT / RESET
+   ============================================================ */
+.lf-result-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lf-reset-row {
+  display: flex;
+  justify-content: center;
+}
+
+.lf-reset-btn {
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 0.65rem 1.25rem;
+}
+
+/* ============================================================
+   FADE-IN ANIMATION
+   ============================================================ */
+.animate-fade-in {
+  animation: nmFadeIn 0.4s ease-out;
+}
+
+@keyframes nmFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   TABLET (900px – 1023px)
+   ============================================================ */
+@media (max-width: 1023px) {
+  .lf-page { max-width: 100%; }
+  .lf-title { font-size: 1.65rem; }
+  .lf-card  { padding: 1.2rem 1.5rem; }
+  .lf-tips  { flex-direction: column; align-items: flex-start; gap: 0.85rem; }
+  .lf-tips-title { min-width: auto; }
+  .lf-tips-grid  { width: 100%; }
+}
+
+/* ============================================================
+   MOBILE (≤ 700px)
+   Allow natural scrolling — don't force 100vh
+   ============================================================ */
+@media (max-width: 700px) {
+
+  /* Show decoratives on mobile but smaller */
+  .lf-deco-left,
+  .lf-deco-right {
+    width: 52px;
+    height: 52px;
+    border-width: 2px;
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+  .lf-page  { overflow: hidden; }
+  .lf-inner { gap: 0.7rem; }
+  .lf-title { font-size: 1.45rem; gap: 0.45rem; }
+  .lf-subtitle { font-size: 0.83rem; }
+
+  .lf-card { padding: 1rem 1rem; gap: 0.85rem; border-radius: 18px; }
+
+  .lf-submit-btn { min-height: 48px; font-size: 0.95rem; }
+
+  .lf-tips { flex-direction: column; gap: 0.7rem; padding: 0.85rem 1rem; border-radius: 14px; }
+  .lf-tips-grid { grid-template-columns: 1fr; gap: 0.65rem; }
+}
+
+@media (max-width: 430px) {
+  .lf-title { font-size: 1.3rem; }
+  .lf-card  { padding: 0.9rem; }
+}
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(255,90,31,0.25);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

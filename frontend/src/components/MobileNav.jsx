@@ -5,7 +5,7 @@ import { LayoutDashboard, Sparkles, BookOpen, User } from 'lucide-react';
 const MobileNav = () => {
   const navItems = [
     { label: 'Home', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Analyze', path: '/analyze', icon: Sparkles },
+    { label: 'Log Food', path: '/analyze', icon: Sparkles },
     { label: 'Diary', path: '/diary', icon: BookOpen },
     { label: 'Profile', path: '/profile', icon: User },
   ];

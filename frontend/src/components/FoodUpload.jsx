@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { UploadCloud, Image as ImageIcon, X, RefreshCw } from 'lucide-react';
+import { Camera, ShieldCheck, X, RefreshCw } from 'lucide-react';
 
 const FoodUpload = ({ imageFile, imagePreview, setImageFile, setImagePreview }) => {
   const fileInputRef = useRef(null);
@@ -8,14 +8,12 @@ const FoodUpload = ({ imageFile, imagePreview, setImageFile, setImagePreview }) 
     const file = e.target.files[0];
     if (file) {
       if (!file.type.match('image.*')) {
-        alert('Please upload a valid image file (PNG, JPG, JPEG, WEBP).');
+        alert('Please select a valid image file (PNG, JPG, JPEG, WEBP).');
         return;
       }
       setImageFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
+      reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -24,110 +22,69 @@ const FoodUpload = ({ imageFile, imagePreview, setImageFile, setImagePreview }) 
     e.stopPropagation();
     setImageFile(null);
     setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
-    <div className="form-group">
-      <label className="form-label">
-        Upload Food Image (Optional)
-      </label>
+    <div className="fu-wrapper">
+      <label className="fu-label">Capture Food Image (Optional)</label>
 
+      {/* Hidden file input — camera capture on mobile */}
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/png, image/jpeg, image/jpg, image/webp"
+        accept="image/*"
+        capture="environment"
         style={{ display: 'none' }}
         onChange={handleFileChange}
         id="food-image-input"
       />
 
       {imagePreview ? (
-        <div style={{
-          position: 'relative',
-          borderRadius: 'var(--radius-md)',
-          overflow: 'hidden',
-          border: '1px solid var(--border-color)',
-          maxHeight: '260px',
-          backgroundColor: '#000000'
-        }}>
-          <img
-            src={imagePreview}
-            alt="Food Preview"
-            style={{
-              width: '100%',
-              height: '240px',
-              objectFit: 'cover',
-              display: 'block'
-            }}
-          />
-          <div style={{
-            position: 'absolute',
-            top: '0.75rem',
-            right: '0.75rem',
-            display: 'flex',
-            gap: '0.5rem'
-          }}>
+        <div className="fu-preview-box">
+          <img src={imagePreview} alt="Food Preview" className="fu-preview-img" />
+          <div className="fu-preview-actions">
             <button
               type="button"
-              className="btn btn-sm btn-secondary"
+              className="btn btn-sm btn-secondary fu-action-btn"
               onClick={() => fileInputRef.current?.click()}
               title="Change image"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(4px)' }}
             >
-              <RefreshCw size={14} />
-              <span>Change</span>
+              <RefreshCw size={13} />
+              Change
             </button>
             <button
               type="button"
-              className="btn btn-sm btn-danger"
+              className="btn btn-sm btn-danger fu-action-btn"
               onClick={handleRemoveImage}
               title="Remove image"
-              style={{ backgroundColor: 'rgba(254, 242, 242, 0.9)', backdropFilter: 'blur(4px)' }}
             >
-              <X size={14} />
-              <span>Remove</span>
+              <X size={13} />
+              Remove
             </button>
           </div>
         </div>
       ) : (
         <div
+          className="fu-camera-box"
           onClick={() => fileInputRef.current?.click()}
-          style={{
-            border: '2px dashed var(--border-color)',
-            borderRadius: 'var(--radius-md)',
-            padding: '2rem 1.5rem',
-            textAlign: 'center',
-            cursor: 'pointer',
-            backgroundColor: 'var(--color-surface)',
-            transition: 'all var(--transition-fast)'
-          }}
-          onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.backgroundColor = 'var(--color-primary-soft)'; }}
-          onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.backgroundColor = 'var(--color-surface)'; }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
         >
-          <div style={{
-            width: '44px',
-            height: '44px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--primary-light)',
-            color: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 0.75rem auto'
-          }}>
-            <UploadCloud size={24} />
+          <div className="fu-camera-icon">
+            <Camera size={22} />
           </div>
-          <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>
-            Click to upload or drag & drop a photo
-          </p>
-          <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-            Supports PNG, JPG, JPEG or WEBP (Max 5MB)
-          </p>
+          <p className="fu-camera-title">Click a photo</p>
+          <p className="fu-camera-sub">Use your camera to take a picture</p>
         </div>
       )}
+
+      {/* Privacy note */}
+      <div className="fu-privacy">
+        <ShieldCheck size={14} style={{ color: '#10b981', flexShrink: 0 }} />
+        <span>We don't store your images. They're only used for your food insights.</span>
+      </div>
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { LayoutDashboard, Sparkles, BookOpen, User, Leaf, X } from 'lucide-react
 
 const navItems = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { label: 'Analyze Food', path: '/analyze', icon: Sparkles },
+  { label: 'Log Food', path: '/analyze', icon: Sparkles },
   { label: 'Food Diary', path: '/diary', icon: BookOpen },
   { label: 'My Profile', path: '/profile', icon: User },
 ];

@@ -5,7 +5,7 @@ import { LayoutDashboard, Sparkles, BookOpen, User, Leaf } from 'lucide-react';
 const Sidebar = ({ userName = 'Chashmitha' }) => {
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Analyze Food', path: '/analyze', icon: Sparkles },
+    { label: 'Log Food', path: '/analyze', icon: Sparkles },
     { label: 'Food Diary', path: '/diary', icon: BookOpen },
     { label: 'My Profile', path: '/profile', icon: User },
   ];
@@ -17,12 +17,12 @@ const Sidebar = ({ userName = 'Chashmitha' }) => {
       left: 0,
       bottom: 0,
       width: 'var(--sidebar-width)',
-      backgroundColor: 'var(--bg-sidebar)',
-      borderRight: '1px solid var(--border-color)',
+      backgroundColor: '#ffffff',
+      borderRight: '1px solid #f3e5dc',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      padding: '1.5rem 1.25rem',
+      padding: '1.75rem 1.25rem',
       zIndex: 90
     }}>
       <div>
@@ -30,36 +30,36 @@ const Sidebar = ({ userName = 'Chashmitha' }) => {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.75rem',
-          padding: '0.5rem 0.5rem 1.5rem 0.5rem',
-          borderBottom: '1px solid var(--border-color)',
-          marginBottom: '1.5rem'
+          gap: '0.85rem',
+          padding: '0.25rem 0.5rem 1.75rem 0.5rem',
+          borderBottom: '1px solid #f3e5dc',
+          marginBottom: '1.75rem'
         }}>
           <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: 'var(--radius-md)',
-            backgroundColor: 'var(--primary)',
+            width: '42px',
+            height: '42px',
+            borderRadius: '12px',
+            backgroundColor: '#ff5722',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px var(--primary-glow)'
+            boxShadow: '0 4px 14px rgba(255, 87, 34, 0.3)'
           }}>
-            <Leaf size={22} />
+            <Leaf size={24} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#171717', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
               NutriMind
             </h2>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            <p style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: 600, marginTop: '0.1rem' }}>
               AI Food & Wellness
             </p>
           </div>
         </div>
 
         {/* Navigation Links */}
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -70,59 +70,23 @@ const Sidebar = ({ userName = 'Chashmitha' }) => {
                 style={({ isActive }) => ({
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.85rem',
-                  padding: '0.75rem 1rem',
-                  borderRadius: 'var(--radius-md)',
-                  fontSize: '0.925rem',
+                  gap: '0.9rem',
+                  padding: '0.85rem 1.1rem',
+                  borderRadius: '14px',
+                  fontSize: '0.95rem',
                   fontWeight: isActive ? 700 : 500,
-                  color: isActive ? 'var(--primary)' : 'var(--text-muted)',
-                  backgroundColor: isActive ? 'var(--primary-light)' : 'transparent',
+                  color: isActive ? '#ff5722' : '#4b5563',
+                  backgroundColor: isActive ? '#fff2eb' : 'transparent',
                   textDecoration: 'none',
-                  transition: 'all var(--transition-fast)'
+                  transition: 'all 0.2s ease'
                 })}
               >
-                <Icon size={20} />
+                <Icon size={20} style={{ color: item.path === '/analyze' ? '#ff5722' : 'inherit' }} />
                 <span>{item.label}</span>
               </NavLink>
             );
           })}
         </nav>
-      </div>
-
-      {/* Bottom Profile Widget */}
-      <div style={{
-        backgroundColor: 'var(--bg-subtle)',
-        borderRadius: 'var(--radius-md)',
-        padding: '1rem',
-        border: '1px solid var(--border-color)'
-      }}>
-        <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-light)', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
-          Your Wellness Profile
-        </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--primary)',
-            color: '#ffffff',
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.85rem'
-          }}>
-            {(userName || 'U').charAt(0).toUpperCase()}
-          </div>
-          <div style={{ overflow: 'hidden' }}>
-            <p style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-main)', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-              {userName || 'User Profile'}
-            </p>
-            <p style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 600 }}>
-              Active Member
-            </p>
-          </div>
-        </div>
       </div>
     </aside>
   );

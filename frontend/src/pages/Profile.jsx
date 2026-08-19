@@ -105,21 +105,21 @@ const Profile = () => {
   if (error) return <ErrorState message={error} onRetry={fetchProfile} />;
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: '840px', margin: '0 auto' }}>
+    <div className="animate-fade-in" style={{ maxWidth: '840px', margin: '0 auto', paddingBottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}>
       <div style={{
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1rem',
-        marginBottom: '1.75rem'
+        gap: '0.75rem',
+        marginBottom: '1.25rem'
       }}>
         <div>
-          <h1 className="h1-heading" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <User size={24} style={{ color: 'var(--primary)' }} />
+          <h1 className="h1-heading" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: 'clamp(1.2rem, 5vw, 1.6rem)' }}>
+            <User size={22} style={{ color: 'var(--primary)', flexShrink: 0 }} />
             <span>My Health Profile</span>
           </h1>
-          <p className="subtitle">
+          <p className="subtitle" style={{ fontSize: 'clamp(0.8rem, 3vw, 0.95rem)' }}>
             Help us personalize your food and wellness guidance.
           </p>
         </div>
@@ -128,6 +128,7 @@ const Profile = () => {
           <button
             className="btn btn-primary"
             onClick={() => setIsEditing(true)}
+            style={{ flexShrink: 0 }}
           >
             <Edit2 size={16} />
             <span>Edit Profile</span>
@@ -139,6 +140,7 @@ const Profile = () => {
               setIsEditing(false);
               setErrors({});
             }}
+            style={{ flexShrink: 0 }}
           >
             Cancel
           </button>
@@ -163,13 +165,13 @@ const Profile = () => {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <form onSubmit={handleSave} className="card" style={{ padding: 'clamp(1rem, 4vw, 2rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {/* Basic Personal Metrics */}
         <div>
           <h3 className="h3-heading" style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
             Basic Information
           </h3>
-          <div className="grid-2">
+          <div className="profile-grid">
             <div className="form-group">
               <label className="form-label" htmlFor="profile-name">
                 Full Name *
@@ -245,7 +247,7 @@ const Profile = () => {
           <h3 className="h3-heading" style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
             Wellness & Lifestyle
           </h3>
-          <div className="grid-2">
+          <div className="profile-grid">
             <div className="form-group">
               <label className="form-label" htmlFor="profile-activity">
                 Activity Level
@@ -293,7 +295,7 @@ const Profile = () => {
           <h3 className="h3-heading" style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
             Health Conditions & Restrictions
           </h3>
-          <div className="grid-2">
+          <div className="profile-grid">
             <div className="form-group">
               <label className="form-label" htmlFor="profile-allergies">
                 Allergies
@@ -367,6 +369,7 @@ const Profile = () => {
               type="submit"
               className="btn btn-primary btn-lg"
               disabled={isSaving}
+              style={{ width: '100%' }}
             >
               {isSaving ? (
                 <>

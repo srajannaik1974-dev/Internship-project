@@ -72,32 +72,67 @@ const FoodDiaryPage = () => {
   });
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ paddingBottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}>
+      {/* ── Premium Food Diary Banner ── */}
       <div style={{
+        position: 'relative',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        marginBottom: '1.25rem',
+        minHeight: 'clamp(120px, 22vw, 160px)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        marginBottom: '1.75rem'
+        justifyContent: 'flex-start',
+        padding: 'clamp(1.25rem, 4vw, 2rem) clamp(1rem, 5vw, 2.5rem)',
+        boxShadow: '0 8px 32px rgba(233, 95, 28, 0.15)'
       }}>
-        <div>
-          <h1 className="h1-heading" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <BookOpen size={24} style={{ color: 'var(--primary)' }} />
-            <span>Food Diary</span>
+        {/* Background image */}
+        <img
+          src="/food-diary-banner.png"
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center'
+          }}
+        />
+        {/* Dark gradient overlay for readability */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(105deg, rgba(20,10,5,0.75) 0%, rgba(20,10,5,0.48) 55%, rgba(20,10,5,0.18) 100%)'
+        }} />
+
+        {/* Text content */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h1 style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontSize: 'clamp(1.2rem, 5vw, 1.75rem)',
+            fontWeight: 800,
+            color: '#ffffff',
+            margin: 0,
+            letterSpacing: '-0.02em'
+          }}>
+            <BookOpen size={22} style={{ color: '#f97316', flexShrink: 0 }} />
+            Food Diary
           </h1>
-          <p className="subtitle">
+          <p style={{
+            fontSize: 'clamp(0.78rem, 3vw, 0.95rem)',
+            color: 'rgba(255,255,255,0.75)',
+            margin: '0.35rem 0 0',
+            fontWeight: 400,
+            maxWidth: '32ch'
+          }}>
             Keep track of what you've eaten and understand your food patterns.
           </p>
         </div>
 
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate('/analyze')}
-        >
-          <PlusCircle size={18} />
-          <span>+ Log Food</span>
-        </button>
       </div>
 
       {/* Date Navigation Bar */}
@@ -105,27 +140,29 @@ const FoodDiaryPage = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '1.75rem',
-        padding: '0.85rem 1.25rem'
+        marginBottom: '1.25rem',
+        padding: '0.75rem 1rem',
+        gap: '0.5rem'
       }}>
         <button
           className="btn btn-sm btn-secondary"
           onClick={handlePrevDay}
+          style={{ flexShrink: 0, padding: '0.4rem 0.7rem', fontSize: '0.8rem' }}
         >
-          <ChevronLeft size={16} />
-          <span>Previous Day</span>
+          <ChevronLeft size={15} />
+          <span className="fd-nav-label">Prev</span>
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <Calendar size={18} style={{ color: 'var(--primary)' }} />
-          <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flex: 1, justifyContent: 'center', minWidth: 0 }}>
+          <Calendar size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {formatDateString(selectedDate)}
           </span>
           {!isToday && (
             <button
               onClick={handleToday}
               className="btn btn-sm btn-outline"
-              style={{ marginLeft: '0.5rem', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+              style={{ flexShrink: 0, padding: '0.15rem 0.5rem', fontSize: '0.7rem' }}
             >
               Today
             </button>
@@ -135,9 +172,10 @@ const FoodDiaryPage = () => {
         <button
           className="btn btn-sm btn-secondary"
           onClick={handleNextDay}
+          style={{ flexShrink: 0, padding: '0.4rem 0.7rem', fontSize: '0.8rem' }}
         >
-          <span>Next Day</span>
-          <ChevronRight size={16} />
+          <span className="fd-nav-label">Next</span>
+          <ChevronRight size={15} />
         </button>
       </div>
 

@@ -8,7 +8,8 @@ import {
   User,
   Lightbulb,
   CheckCircle2,
-  Utensils
+  Utensils,
+  ChevronDown
 } from 'lucide-react';
 
 const LandingPage = () => {
@@ -32,25 +33,25 @@ const LandingPage = () => {
           {/* Hero Left Content */}
           <div className="hero-copy">
             <div className="hero-pill-badge">
-              
               <span>There's More to Every Bite.</span>
             </div>
 
             <h1 className="hero-title">
-  Your plate,
-  <br />
-  finally <span className="highlight-accent">legible.</span>
-</h1>
+              Your plate,
+              <br />
+              finally <span className="highlight-accent">legible.</span>
+            </h1>
 
             <p className="hero-subtitle">
-No barcode. No guesswork. Snap your real meal — NutriMind reads the plate and hands you honest numbers: protein, carbs, and calories, in seconds.            </p>
+              No barcode. No guesswork. Snap your real meal — NutriMind reads the plate and hands you honest numbers: protein, carbs, and calories, in seconds.
+            </p>
 
             <div className="hero-actions">
               <button
                 className="btn btn-primary btn-lg"
                 onClick={() => navigate('/signin')}
               >
-                <span>Analyze a meal</span>
+                <span>Get Started</span>
                 <ArrowRight size={18} />
               </button>
               <button
@@ -62,9 +63,17 @@ No barcode. No guesswork. Snap your real meal — NutriMind reads the plate and 
             </div>
 
             <div className="hero-proof">
-              
               <strong>Track what's in your meal before Your Next Bite.</strong>
             </div>
+
+            {/* Mobile Scroll Down Indicator */}
+            <button
+              className="hero-mobile-scroll-indicator"
+              onClick={() => scrollToSection('how-it-works')}
+              aria-label="Scroll down to details"
+            >
+              <ChevronDown size={24} />
+            </button>
           </div>
 
           {/* Hero Right — food video + analysis card */}
@@ -81,9 +90,9 @@ No barcode. No guesswork. Snap your real meal — NutriMind reads the plate and 
               />
 
               <div className="hero-food-overlay" />
-               <div className="real-meal-label">
-    REAL MEAL
-  </div>
+              <div className="real-meal-label">
+                REAL MEAL
+              </div>
 
               {/* Top-right status pill */}
               <div className="hero-meals-pill">
@@ -299,7 +308,7 @@ No barcode. No guesswork. Snap your real meal — NutriMind reads the plate and 
             </div>
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>↓</span>
             <div className="flow-result-node">
-              
+
               Personalized Guidance
             </div>
           </div>
@@ -345,7 +354,7 @@ No barcode. No guesswork. Snap your real meal — NutriMind reads the plate and 
                 <span className="logo-title">NutriMind</span>
               </div>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            Small choices. Better habits. A healthier you.
+                Small choices. Better habits. A healthier you.
               </p>
             </div>
 

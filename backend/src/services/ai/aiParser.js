@@ -17,13 +17,11 @@ function parseAndValidateFoodAnalysis(rawResponse) {
 
   let data;
   try {
-    // Attempt to parse JSON. Sometimes Gemini includes markdown JSON blocks.
     let cleanJson = rawResponse.trim();
-    if (cleanJson.startsWith('```')) {
-      // Remove starting ```json or ```
-      cleanJson = cleanJson.replace(/^```(json)?\s*/i, '');
-      // Remove ending ```
-      cleanJson = cleanJson.replace(/\s*```$/, '');
+    // Extract JSON object using regex to ignore any surrounding markdown or thoughtSignature text
+    const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanJson = jsonMatch[0];
     }
     data = JSON.parse(cleanJson);
   } catch (err) {
@@ -104,9 +102,9 @@ function parseAndValidateDailyInsight(rawResponse) {
   let data;
   try {
     let cleanJson = rawResponse.trim();
-    if (cleanJson.startsWith('```')) {
-      cleanJson = cleanJson.replace(/^```(json)?\s*/i, '');
-      cleanJson = cleanJson.replace(/\s*```$/, '');
+    const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanJson = jsonMatch[0];
     }
     data = JSON.parse(cleanJson);
   } catch (err) {

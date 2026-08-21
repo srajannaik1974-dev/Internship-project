@@ -13,15 +13,20 @@
  * @returns {string} The constructed prompt for Gemini.
  */
 function getFoodAnalysisPrompt(foodDescription, mealType, quantity, hasImage) {
+  const isGenericText = !foodDescription || foodDescription.trim() === 'Uploaded Food Image';
+  const descriptionValue = hasImage && isGenericText 
+    ? "No text description provided — identify the food item 100% visually from the attached image." 
+    : foodDescription;
+
   const imageInstruction = hasImage 
-    ? "Analyze the provided food image. If the image is unclear, low quality, or does not appear to contain food, clearly mention this in the 'analysis' field and lower your confidence rather than inventing food items."
-    : "Analyze the provided food description.";
+    ? "PRIMARY TASK: Carefully examine the attached food image. Identify the exact dish, meal, or food items visible in the image (for example: Dosa, Biryani, Pizza, Salad, Pasta, Curry, etc.). Base your 'food_name', wellness analysis, and nutrition estimates PRIMARILY on what you visually see in the image."
+    : "Analyze the provided food description text.";
 
   return `You are a professional nutrition and wellness AI assistant.
 ${imageInstruction}
 
 Details of the meal input:
-- Food Description: ${foodDescription || "Not provided"}
+- Food Description: ${descriptionValue}
 - Meal Type: ${mealType || "Not specified"}
 - Quantity: ${quantity || "Standard portion"}
 

@@ -32,7 +32,7 @@ async function analyze(req, res) {
 
     return res.status(200).json(result);
   } catch (error) {
-    // Map controller error responses. If it's a validation/input issue, use 400, else 500
+    console.error('[Analyze Controller Error]:', error.message || error);
     const message = error.message || 'An error occurred during food analysis';
     if (message.includes('Invalid or missing API key') || message.includes('Configuration Error')) {
       return res.status(500).json({ error: 'AI Service is misconfigured. Please contact support.' });

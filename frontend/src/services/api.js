@@ -250,13 +250,8 @@ export const analyzeFood = async (formData) => {
     let body = formData;
     let config = {};
 
-    if (formData instanceof FormData) {
-      config = {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      };
-    }
-
-    const response = await apiClient.post('/analyze', body, config);
+    // When sending FormData, let Axios automatically manage the Content-Type header with the boundary
+    const response = await apiClient.post('/analyze', formData);
     return response.data;
   } catch (error) {
     console.log('[API Service] Backend unavailable for POST /analyze-food, generating mock analysis.');

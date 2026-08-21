@@ -17,7 +17,7 @@ const { getFoodAnalysisPrompt, getDailyInsightPrompt } = require('./prompts');
 const { parseAndValidateFoodAnalysis, parseAndValidateDailyInsight } = require('./aiParser');
 
 // Model definition — gemini-3.5-flash is the current recommended model for new API keys (Aug 2026)
-const DEFAULT_MODEL = 'gemini-3.5-flash';
+const DEFAULT_MODEL = 'gemini-1.5-flash';
 
 // Helper to initialize GoogleGenAI client securely
 function getAiClient() {
@@ -100,6 +100,7 @@ async function analyzeFood({ foodDescription, mealType, quantity, image } = {}) 
     return parseAndValidateFoodAnalysis(rawText);
 
   } catch (error) {
+    console.error('[Gemini Service Error Raw]:', error.message || error);
     // Standardize Gemini and application-level errors
     const errorMessage = error.message || 'An error occurred during food analysis.';
     

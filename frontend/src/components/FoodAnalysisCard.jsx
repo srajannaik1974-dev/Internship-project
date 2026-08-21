@@ -71,16 +71,20 @@ const FoodAnalysisCard = ({ analysisResult, onAddToDiary }) => {
             Estimated Nutrition Breakdown
           </h4>
           <div className="grid-4" style={{ gap: '0.75rem' }}>
-            {Object.entries(analysisResult.estimated_nutrition).map(([key, val]) => (
-              <div key={key} style={{ backgroundColor: 'var(--bg-subtle)', padding: '0.75rem', borderRadius: 'var(--radius-md)', textAlign: 'center', border: '1px solid var(--border-color)' }}>
-                <p style={{ fontSize: '0.725rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'capitalize' }}>
-                  {key}
-                </p>
-                <p style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '0.1rem' }}>
-                  {val}
-                </p>
-              </div>
-            ))}
+            {Object.entries(analysisResult.estimated_nutrition).map(([key, val]) => {
+              const unit = key === 'calories' ? 'kcal' : 'g';
+              const label = key === 'carbohydrates' ? 'carbs' : key;
+              return (
+                <div key={key} style={{ backgroundColor: 'var(--bg-subtle)', padding: '0.75rem', borderRadius: 'var(--radius-md)', textAlign: 'center', border: '1px solid var(--border-color)' }}>
+                  <p style={{ fontSize: '0.725rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'capitalize' }}>
+                    {label}
+                  </p>
+                  <p style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '0.1rem' }}>
+                    {val}<span style={{ fontSize: '0.7rem', fontWeight: 500, marginLeft: '2px', color: 'var(--text-muted)' }}>{unit}</span>
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

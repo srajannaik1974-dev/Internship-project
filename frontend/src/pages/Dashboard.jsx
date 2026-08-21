@@ -30,7 +30,7 @@ const Dashboard = () => {
     : [];
 
   const getMealForType = (type) => {
-    return mealsList.find(m => (m.meal_type || m.mealType || m.type || '').toLowerCase() === type.toLowerCase()) || null;
+    return mealsList.find(m => (m.meal_type || m.mealType || m.category || m.type || '').toLowerCase() === type.toLowerCase()) || null;
   };
 
   const handleMealOption = (option, name) => {

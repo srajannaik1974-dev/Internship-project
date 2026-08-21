@@ -6,12 +6,13 @@ const MealCard = ({ meal, onClick = null }) => {
   if (!meal) return null;
 
   const {
-    food_name = 'Logged Food',
-    meal_type = 'Meal',
     time = 'Logged',
     wellness_level = 'Low Concern',
     analysis = ''
   } = meal;
+
+  const foodName = meal.name || meal.food_name || 'Logged Food';
+  const mealType = meal.category || meal.meal_type || 'Meal';
 
   return (
     <div
@@ -31,13 +32,13 @@ const MealCard = ({ meal, onClick = null }) => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.785rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
             <Utensils size={13} />
-            <span style={{ fontWeight: 600 }}>{meal_type}</span>
+            <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{mealType}</span>
             <span>•</span>
             <Clock size={13} />
             <span>{time}</span>
           </div>
           <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)' }}>
-            {food_name}
+            {foodName}
           </h3>
         </div>
         <RiskBadge level={wellness_level} />

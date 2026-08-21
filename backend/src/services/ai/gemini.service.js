@@ -16,8 +16,8 @@ const { GoogleGenAI } = require('@google/genai');
 const { getFoodAnalysisPrompt, getDailyInsightPrompt } = require('./prompts');
 const { parseAndValidateFoodAnalysis, parseAndValidateDailyInsight } = require('./aiParser');
 
-// Model definition — gemini-3.5-flash is the current recommended model for new API keys (Aug 2026)
-const DEFAULT_MODEL = 'gemini-1.5-flash';
+// Model definition — gemini-3.6-flash (confirmed available for this API key)
+const DEFAULT_MODEL = 'gemini-3.6-flash';
 
 // Helper to initialize GoogleGenAI client securely
 function getAiClient() {
@@ -54,10 +54,10 @@ async function analyzeFood({ foodDescription, mealType, quantity, image } = {}) 
     // 2. Initialize Gemini client
     const ai = getAiClient();
 
-    // 3. Prepare content parts
-    const contents = [];
+    // 3. Build the parts array (image first, then text prompt)
+    const parts = [];
 
-    // Add image if present
+    // Add image part if present
     if (hasImage) {
       let base64Data = '';
       let mimeType = image.mimeType || 'image/jpeg';
@@ -65,14 +65,14 @@ async function analyzeFood({ foodDescription, mealType, quantity, image } = {}) 
       if (image.buffer && Buffer.isBuffer(image.buffer)) {
         base64Data = image.buffer.toString('base64');
       } else if (typeof image.base64 === 'string') {
-        base64Data = image.base64.replace(/^data:image\/\w+;base64,/, ''); // strip prefix if present
+        base64Data = image.base64.replace(/^data:image\/[\w+]+;base64,/, '');
       }
 
       if (!base64Data) {
         throw new Error('Invalid image data provided.');
       }
 
-      contents.push({
+      parts.push({
         inlineData: {
           mimeType,
           data: base64Data
@@ -80,15 +80,15 @@ async function analyzeFood({ foodDescription, mealType, quantity, image } = {}) 
       });
     }
 
-    // Add prompt text
+    // Add text prompt part
     const promptText = getFoodAnalysisPrompt(foodDescription, mealType, quantity, hasImage);
-    contents.push({ text: promptText });
+    parts.push({ text: promptText });
 
     // 4. Send request to Gemini
+    // contents must be [{role:'user', parts:[...]}] for the @google/genai SDK
     const response = await ai.models.generateContent({
       model: DEFAULT_MODEL,
-      contents: contents,
-      // Request JSON output constraint if supported, or rely on prompt formatting
+      contents: [{ role: 'user', parts }],
       config: {
         responseMimeType: 'application/json'
       }

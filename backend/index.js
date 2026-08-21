@@ -1,3 +1,4 @@
+require('dns').setServers(['8.8.8.8', '8.8.4.4']);
 const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
@@ -51,4 +52,4 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-});
+});

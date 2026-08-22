@@ -1,4 +1,3 @@
-
 const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
@@ -12,6 +11,7 @@ const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const foodRoutes = require('./routes/foodRoutes');
 const aiRoutes = require('./src/routes/ai.routes');
+
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 // Connect to MongoDB
@@ -31,7 +31,6 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api', aiRoutes);
 
 // Base Routes
 app.get('/', (req, res) => {
@@ -47,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/foods', foodRoutes);
 app.use('/api/food', foodRoutes); // Alias for frontend compatibility
+app.use('/api', aiRoutes);        // AI analysis & daily insight routes
 
 // Global Error Handler
 app.use(errorHandler);
@@ -55,4 +55,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-

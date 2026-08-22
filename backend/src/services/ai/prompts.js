@@ -5,7 +5,7 @@
 
 /**
  * Generates the prompt for analyzing a food item.
- * 
+ *
  * @param {string} foodDescription Description of the food provided by the user.
  * @param {string} mealType Type of the meal (e.g., Breakfast, Lunch, Dinner, Snack).
  * @param {string} quantity Quantity of the food (e.g., "1 plate", "200g").
@@ -13,53 +13,76 @@
  * @returns {string} The constructed prompt for Gemini.
  */
 function getFoodAnalysisPrompt(foodDescription, mealType, quantity, hasImage) {
-  const isGenericText = !foodDescription || foodDescription.trim() === 'Uploaded Food Image';
-  const descriptionValue = hasImage && isGenericText 
-    ? "No text description provided — identify the food item 100% visually from the attached image." 
-    : foodDescription;
+  const hasDesc = typeof foodDescription === 'string'
+    && foodDescription.trim().length > 0
+    && foodDescription.trim() !== 'Uploaded Food Image';
 
-  const imageInstruction = hasImage 
-    ? "PRIMARY TASK: Carefully examine the attached food image. Identify the exact dish, meal, or food items visible in the image (for example: Dosa, Biryani, Pizza, Salad, Pasta, Curry, etc.). Base your 'food_name', wellness analysis, and nutrition estimates PRIMARILY on what you visually see in the image."
-    : "Analyze the provided food description text.";
+  let imageInstruction = '';
+  if (hasImage && !hasDesc) {
+    imageInstruction = `PRIMARY TASK — VISUAL FOOD IDENTIFICATION & CALORIE ESTIMATION:
+1. Carefully examine the attached food image.
+2. Identify every food/dish item visible (e.g. Butter Chicken, Naan, Samosa, Pizza, Salad bowl, etc.). Be SPECIFIC — not just "rice" but "Basmati rice" or "fried rice".
+3. Estimate the PORTION SIZE from visual cues (plate size, food height, density, serving utensils visible). Common references: a standard dinner plate ≈ 26 cm, a fist ≈ 240 ml, a palm of meat ≈ 85g.
+4. Use those portion estimates to calculate realistic CALORIE and MACRO values — do NOT use a generic 300 kcal default.
+5. If multiple items are visible (e.g. rice + curry + salad), list them all in food_name and SUM their nutritional values.
+6. If the image is unclear, dark, or doesn't appear to contain food, state that clearly in the analysis.`;
+  } else if (hasImage && hasDesc) {
+    imageInstruction = `PRIMARY TASK — VISUAL ANALYSIS WITH TEXT CONTEXT:
+You have BOTH a food image AND the user's description: "${foodDescription}".
+1. Use the image as the PRIMARY source — visually confirm and identify all food items.
+2. Use the text description as secondary context to clarify dish name or portion size.
+3. Estimate the portion size from visual cues in the image.
+4. Calculate realistic calorie and macro values based on what you actually see — NOT generic averages.
+5. If multiple items are visible, sum all nutritional values.`;
+  } else {
+    imageInstruction = `TASK — TEXT-BASED FOOD ANALYSIS:
+Analyze the food based on this description: "${foodDescription}".
+Use standard nutritional databases (USDA/IFCT) to estimate calories and macros for the given quantity.`;
+  }
 
-  return `You are a professional nutrition and wellness AI assistant.
+  const descriptionValue = hasDesc
+    ? foodDescription
+    : 'No text description — identify and analyse 100% from the image.';
+
+  return `You are an expert clinical nutritionist and AI food recognition system.
+
 ${imageInstruction}
 
-Details of the meal input:
+Meal context provided by the user:
 - Food Description: ${descriptionValue}
-- Meal Type: ${mealType || "Not specified"}
-- Quantity: ${quantity || "Standard portion"}
+- Meal Type: ${mealType || 'Not specified'}
+- Stated Quantity / Portion: ${quantity || 'Estimate from image'}
 
-Your task:
-1. Identify the most likely food item.
-2. Estimate the approximate nutrition values based on the identified food and provided quantity.
-3. Perform a wellness analysis. The wellness level MUST be evaluated and categorised into exactly one of these options:
-   - "Low Concern" (for highly nutritious, balanced meals)
-   - "Moderate Concern" (for meals that are somewhat balanced but might contain excess sugars, sodium, fat, or calories depending on portion)
-   - "High Concern" (for highly processed meals, very high calorie/fat/sugar content, or options that generally offer low nutritional density)
-4. Offer a healthier suggestion (e.g., healthier alternatives, portion control, or adding vegetables/proteins).
+Your output requirements:
+1. food_name: Specific dish name(s). Never use "Food item" or "Unknown". If image only, name what you SEE.
+2. estimated_nutrition: Realistic values for the ACTUAL portion visible or stated — not generic averages.
+   - For a full plate of rice + curry, calories should be 600–900 kcal, not 300.
+   - For a single samosa, calories ≈ 150–200 kcal.
+   - For a large burger, calories ≈ 450–700 kcal.
+   - Scale all macros proportionally to the portion.
+3. wellness_level: EXACTLY one of:
+   - "Low Concern"      → nutritious, balanced, minimally processed
+   - "Moderate Concern" → decent but has excess sugar / sodium / fat / calories
+   - "High Concern"     → highly processed, very high calorie/fat/sugar, low nutritional value
+4. analysis: 2–3 sentences covering key nutritional highlights and wellness impact.
+5. suggestion: One specific, actionable improvement (e.g., "Add a cup of dal for 10g extra protein").
 
-CRITICAL MEDICAL SAFETY CONSTRAINTS:
-- Do NOT diagnose medical conditions or diseases.
-- Do NOT claim that a food is guaranteed medically safe or medically dangerous.
-- Do NOT prescribe treatments or medication.
-- Always frame nutrition values as estimates. Use non-definitive wording.
-- Incorporate safety phrases in your response text where appropriate (e.g., "This meal may not align with your saved wellness preferences", "This is an approximate nutrition estimate", "This information is for wellness guidance and is not medical advice").
+MANDATORY DISCLAIMER: Include "This is for wellness guidance and is not medical advice." in the analysis field.
 
-You must return ONLY a valid JSON object. Do not include markdown formatting like \`\`\`json or \`\`\` around the JSON response. Do not include any explanations or commentary outside the JSON object.
+Return ONLY a valid JSON object — no markdown fences, no extra text outside the JSON.
 
-The JSON response MUST match this exact schema:
+Required JSON schema (all nutrition values MUST be plain integers — no units, no strings):
 {
-  "food_name": "Name of the identified food",
+  "food_name": "Specific name of identified food(s)",
   "wellness_level": "Low Concern" | "Moderate Concern" | "High Concern",
-  "analysis": "A concise wellness and nutritional analysis. Include the safety disclaimer.",
-  "suggestion": "A supportive, actionable suggestion for wellness.",
+  "analysis": "2-3 sentence nutritional analysis. This is for wellness guidance and is not medical advice.",
+  "suggestion": "One specific, actionable wellness suggestion.",
   "estimated_nutrition": {
-    "calories": 120, // Must be an integer representing kcal
-    "protein": 10, // Must be an integer representing grams
-    "carbohydrates": 20, // Must be an integer representing grams
-    "fat": 5, // Must be an integer representing grams
-    "fiber": 2 // Must be an integer representing grams
+    "calories": 520,
+    "protein": 28,
+    "carbohydrates": 55,
+    "fat": 18,
+    "fiber": 5
   }
 }
 `;
@@ -67,14 +90,14 @@ The JSON response MUST match this exact schema:
 
 /**
  * Generates the prompt for daily wellness insights.
- * 
+ *
  * @param {Object} profile User health profile (age, height, weight, activity, diet, allergies, conditions, notes).
  * @param {Array} meals Array of meal logs for today.
  * @returns {string} The constructed prompt for Gemini.
  */
 function getDailyInsightPrompt(profile, meals) {
-  const profileStr = profile ? JSON.stringify(profile) : "No health profile provided.";
-  const mealsStr = meals && meals.length > 0 ? JSON.stringify(meals) : "No meals logged today yet.";
+  const profileStr = profile ? JSON.stringify(profile) : 'No health profile provided.';
+  const mealsStr = meals && meals.length > 0 ? JSON.stringify(meals) : 'No meals logged today yet.';
 
   return `You are a professional health and wellness AI assistant.
 Generate a daily personalized wellness insight for a user based on their health profile and their logged meals for today.

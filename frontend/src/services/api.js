@@ -6,18 +6,24 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 20000,
+  // Do NOT set a global Content-Type here.
+  // Axios sets it automatically per-request:
+  //   - JSON body  → 'application/json'
+  //   - FormData   → 'multipart/form-data; boundary=...' (set by browser)
+  timeout: 60000,
 });
 
-// Axios Request Interceptor to attach JWT token to every request
+// Axios Request Interceptor — attach JWT + set Content-Type for JSON requests
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Only set JSON content-type when NOT sending FormData
+    // (FormData needs the browser to set multipart/form-data with its boundary)
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = config.headers['Content-Type'] || 'application/json';
     }
     return config;
   },
@@ -246,48 +252,50 @@ export const deleteFoodEntry = async (id) => {
  */
 export const analyzeFood = async (formData) => {
   try {
-    // If input is not already FormData, convert it or send directly
-    let body = formData;
-    let config = {};
-
-    // When sending FormData, let Axios automatically manage the Content-Type header with the boundary
-    const response = await apiClient.post('/analyze', formData);
+    // When sending FormData, Content-Type MUST NOT be set manually.
+    // Setting it to undefined removes the instance-level 'application/json'
+    // header so the browser can inject 'multipart/form-data; boundary=...'.
+    // Without the correct boundary, multer won't parse the image file.
+    const config = formData instanceof FormData
+      ? { headers: { 'Content-Type': undefined } }
+      : {};
+    const response = await apiClient.post('/analyze', formData, config);
     return response.data;
   } catch (error) {
-    console.log('[API Service] Backend unavailable for POST /analyze-food, generating mock analysis.');
-    
-    // Simulate API delay for realism
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Re-throw the actual error so the UI shows the real problem.
+    // Only fall back to mock data when the backend is completely unreachable (network error / ECONNREFUSED).
+    const isNetworkDown = !error.response;
+    if (!isNetworkDown) {
+      // Backend responded with an error — surface it to the user.
+      throw error;
+    }
+
+    console.warn('[API Service] Backend unreachable — using offline mock analysis.');
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     let foodDesc = 'Food item';
     if (formData instanceof FormData) {
-      foodDesc = formData.get('food_description') || formData.get('food_name') || 'Food item';
+      foodDesc = formData.get('food_description') || 'Food item';
+      if (!foodDesc || foodDesc.trim() === '') foodDesc = 'Captured Food Image';
     } else if (typeof formData === 'object') {
-      foodDesc = formData.food_description || formData.food_name || 'Food item';
+      foodDesc = formData.food_description || 'Food item';
     }
 
     const descLower = foodDesc.toLowerCase();
-    let result = sampleFoodAnalysis.Default;
-
-    if (descLower.includes('samosa')) {
-      result = sampleFoodAnalysis.Samosa;
-    } else {
-      result = {
-        food_name: foodDesc,
-        wellness_level: descLower.includes('salad') || descLower.includes('fruit') || descLower.includes('idli') ? 'Low Concern' : 'Moderate Concern',
-        analysis: `Analysis for "${foodDesc}": Contains carbohydrates and essential dietary components.`,
-        suggestion: 'Balance this meal with fresh vegetables and adequate hydration.',
-        estimated_nutrition: {
-          calories: 280,
-          protein: "8g",
-          carbs: "38g",
-          fats: "9g",
-          fiber: "3g"
-        }
-      };
-    }
-
-    return result;
+    return {
+      food_name: foodDesc,
+      wellness_level: (descLower.includes('salad') || descLower.includes('fruit') || descLower.includes('idli'))
+        ? 'Low Concern' : 'Moderate Concern',
+      analysis: `Offline estimate for "${foodDesc}". Connect to the internet for accurate AI analysis. This is for wellness guidance and is not medical advice.`,
+      suggestion: 'Balance this meal with fresh vegetables and adequate hydration.',
+      estimated_nutrition: {
+        calories: 280,
+        protein: 8,
+        carbohydrates: 38,
+        fat: 9,
+        fiber: 3
+      }
+    };
   }
 };
 

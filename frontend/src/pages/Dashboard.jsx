@@ -9,12 +9,10 @@ import { useNavigate } from 'react-router-dom';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [skippedMeals, setSkippedMeals] = useState([]);
-  const [selectedMeal, setSelectedMeal] = useState('');
 
   const { data: todaysMeals, loading: mealsLoading } = useApi(getTodaysFood, true);
   const storedUser = getStoredUser();
   const userName = storedUser?.name || 'there';
-
 
   const mealTypes = [
     { name: 'Breakfast', icon: Sunrise, color: 'morning' },
@@ -33,15 +31,6 @@ const Dashboard = () => {
     return mealsList.find(m => (m.meal_type || m.mealType || m.type || '').toLowerCase() === type.toLowerCase()) || null;
   };
 
-  const handleMealOption = (option, name) => {
-    if (option === 'skip') {
-      setSkippedMeals((current) => current.includes(name) ? current : [...current, name]);
-    }
-    if (mealTypes.some(({ name: mealName }) => mealName === option)) {
-      setSelectedMeal(option);
-    }
-  };
-
   const loggedCount = mealsList.length;
   const nextMeal = mealTypes.find(({ name }) => !getMealForType(name) && !skippedMeals.includes(name))?.name || 'All meals handled';
   const progress = Math.round(((loggedCount + skippedMeals.length) / mealTypes.length) * 100);
@@ -58,15 +47,7 @@ const Dashboard = () => {
         </div>
         <div className="dashboard-hero-side">
           <div className="dashboard-hero-action">
-            <div className="dashboard-next-meal">
-              <span>Next up:</span>
-              <select aria-label="Select meal to log" value={selectedMeal} disabled={nextMeal === 'All meals handled'} onChange={(event) => handleMealOption(event.target.value, nextMeal)}>
-                <option value="" disabled>Choose</option>
-                {mealTypes.map(({ name }) => <option value={name} key={name}>{name}</option>)}
-                <option value="skip">Skip meal</option>
-              </select>
-            </div>
-            <button className="btn btn-primary dashboard-log-button" onClick={() => navigate('/analyze', { state: { mealType: selectedMeal || nextMeal } })} disabled={nextMeal === 'All meals handled'}>
+            <button className="btn btn-primary dashboard-log-button" onClick={() => navigate('/analyze', { state: { mealType: nextMeal !== 'All meals handled' ? nextMeal : '' } })} disabled={nextMeal === 'All meals handled'}>
               <Plus size={18} /> Log meal
             </button>
           </div>

@@ -65,6 +65,12 @@ if (!localStorage.getItem('nutrimind_food')) {
 /**
  * AUTHENTICATION API
  */
+export const logoutUser = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('nutrimind_profile');
+};
+
 export const getStoredUser = () => {
   try {
     const userStr = localStorage.getItem('user');

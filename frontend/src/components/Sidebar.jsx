@@ -1,8 +1,16 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Sparkles, BookOpen, User, Leaf } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Sparkles, BookOpen, User, Leaf, LogOut } from 'lucide-react';
+import { logoutUser } from '../services/api';
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logoutUser();
+    navigate('/signin');
+  };
+
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Log Food', path: '/analyze', icon: Sparkles },
@@ -88,6 +96,29 @@ const Sidebar = () => {
           })}
         </nav>
       </div>
+
+      {/* Logout Button */}
+      <button
+        onClick={handleLogout}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.9rem',
+          width: '100%',
+          padding: '0.85rem 1.1rem',
+          borderRadius: '14px',
+          fontSize: '0.95rem',
+          fontWeight: 600,
+          color: '#ef4444',
+          backgroundColor: '#fef2f2',
+          border: 'none',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        <LogOut size={20} />
+        <span>Log out</span>
+      </button>
     </aside>
   );
 };

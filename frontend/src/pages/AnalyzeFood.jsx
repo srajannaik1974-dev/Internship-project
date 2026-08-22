@@ -15,7 +15,7 @@ const AnalyzeFood = () => {
   const location = useLocation();
   const [foodDescription, setFoodDescription] = useState('');
   const [mealType, setMealType] = useState(location.state?.mealType || 'Breakfast');
-  const [quantity, setQuantity] = useState('1 serving');
+  const [quantity, setQuantity] = useState(' ');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
@@ -72,7 +72,7 @@ const AnalyzeFood = () => {
   const handleResetForm = () => {
     setFoodDescription('');
     setMealType('Breakfast');
-    setQuantity('1 serving');
+    setQuantity(' ');
     setImageFile(null);
     setImagePreview(null);
     setAnalysisResult(null);

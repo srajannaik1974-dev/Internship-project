@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Sparkles, BookOpen, User, Leaf, X } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Sparkles, BookOpen, User, Leaf, X, LogOut } from 'lucide-react';
+import { logoutUser } from '../services/api';
 
 const navItems = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -10,6 +11,14 @@ const navItems = [
 ];
 
 const MobileDrawer = ({ isOpen, onClose, userName = 'User' }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    onClose();
+    logoutUser();
+    navigate('/signin');
+  };
+
   // Lock body scroll while drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -75,15 +84,34 @@ const MobileDrawer = ({ isOpen, onClose, userName = 'User' }) => {
           })}
         </nav>
 
-        {/* User profile widget at bottom */}
-        <div className="mobile-drawer__profile">
-          <div className="mobile-drawer__avatar">
-            {(userName || 'U').charAt(0).toUpperCase()}
+        {/* User profile widget & Logout button at bottom */}
+        <div className="mobile-drawer__profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="mobile-drawer__avatar">
+              {(userName || 'U').charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p className="mobile-drawer__profile-name">{userName || 'User'}</p>
+              <p className="mobile-drawer__profile-sub">Active Member</p>
+            </div>
           </div>
-          <div>
-            <p className="mobile-drawer__profile-name">{userName || 'User'}</p>
-            <p className="mobile-drawer__profile-sub">Active Member</p>
-          </div>
+          <button
+            onClick={handleLogout}
+            title="Log out"
+            style={{
+              background: '#fef2f2',
+              border: '1px solid #fee2e2',
+              borderRadius: '8px',
+              padding: '0.4rem',
+              color: '#ef4444',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <LogOut size={18} />
+          </button>
         </div>
       </div>
     </>

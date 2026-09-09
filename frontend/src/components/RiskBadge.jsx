@@ -1,38 +1,45 @@
 import React from 'react';
 
 const RiskBadge = ({ level = 'Low Concern' }) => {
-  const getBadgeStyle = (wellnessLevel) => {
+  const getBadgeDetails = (wellnessLevel) => {
     switch (wellnessLevel?.toLowerCase()) {
       case 'low concern':
       case 'good':
       case 'healthy':
-        return { bg: '#dcfce7', text: '#15803d', border: '#bbf7d0' };
+        return { bg: '#ecfdf5', text: '#047857', border: '#a7f3d0', icon: '🟢', label: level || 'Low Concern' };
       case 'moderate concern':
       case 'moderate':
-        return { bg: '#fef9c3', text: '#a16207', border: '#fef08a' };
+        return { bg: '#fffbeb', text: '#b45309', border: '#fde68a', icon: '🟡', label: level || 'Moderate Concern' };
       case 'high concern':
       case 'unhealthy':
-        return { bg: '#fee2e2', text: '#b91c1c', border: '#fca5a5' };
+        return { bg: '#fef2f2', text: '#b91c1c', border: '#fecaca', icon: '🔴', label: level || 'High Concern' };
+      case 'n/a':
+      case 'na':
+        return { bg: '#f3f4f6', text: '#6b7280', border: '#e5e7eb', icon: '⚪', label: 'N/A' };
       default:
-        return { bg: 'var(--bg-subtle)', text: 'var(--text-muted)', border: 'var(--border-color)' };
+        return { bg: 'var(--bg-subtle)', text: 'var(--text-muted)', border: 'var(--border-color)', icon: '⚪', label: level };
     }
   };
 
-  const style = getBadgeStyle(level);
+  const details = getBadgeDetails(level);
 
   return (
     <span style={{
       display: 'inline-flex',
       alignItems: 'center',
-      padding: '0.25rem 0.75rem',
+      gap: '0.35rem',
+      padding: '0.3rem 0.85rem',
       borderRadius: 'var(--radius-full)',
-      fontSize: '0.8rem',
+      fontSize: '0.825rem',
       fontWeight: 700,
-      backgroundColor: style.bg,
-      color: style.text,
-      border: `1px solid ${style.border}`
+      backgroundColor: details.bg,
+      color: details.text,
+      border: `1px solid ${details.border}`,
+      boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+      transition: 'all 0.2s ease-in-out'
     }}>
-      {level}
+      <span style={{ fontSize: '0.65rem' }}>{details.icon}</span>
+      <span>{details.label}</span>
     </span>
   );
 };

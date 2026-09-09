@@ -1,34 +1,32 @@
-import React, { useState } from 'react';
+import React from 'react';
 import RiskBadge from './RiskBadge';
-import { CheckCircle2, PlusCircle, Sparkles } from 'lucide-react';
+import { CheckCircle2, Sparkles, Home, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const FoodAnalysisCard = ({ analysisResult, onAddToDiary }) => {
+const FoodAnalysisCard = ({ analysisResult, onReset }) => {
   const navigate = useNavigate();
-  const [isSaving, setIsSaving] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
 
   if (!analysisResult) return null;
 
-  const handleAdd = async () => {
-    setIsSaving(true);
-    try {
-      if (onAddToDiary) {
-        await onAddToDiary(analysisResult);
-      }
-      setSavedSuccess(true);
-      setTimeout(() => {
-        navigate('/diary');
-      }, 1200);
-    } catch (err) {
-      console.error('Failed to save to diary:', err);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   return (
     <div className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Success Notification Banner */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        color: '#15803d',
+        fontWeight: 700,
+        padding: '0.85rem 1.25rem',
+        backgroundColor: '#dcfce7',
+        border: '1px solid #86efac',
+        borderRadius: 'var(--radius-md)',
+        fontSize: '0.95rem'
+      }}>
+        <CheckCircle2 size={22} style={{ color: '#16a34a', flexShrink: 0 }} />
+        <span>Successfully logged for {analysisResult.meal_type || 'Meal'}! Home timeline updated.</span>
+      </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
           <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -49,7 +47,10 @@ const FoodAnalysisCard = ({ analysisResult, onAddToDiary }) => {
             Nutritional & Wellness Analysis
           </h4>
           <p style={{ fontSize: '0.925rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-            {analysisResult.analysis}
+            {analysisResult.analysis === 'N/A' 
+              ? 'N/A — Specific food item not identified. Please specify the exact dish (e.g., Gulab Jamun, Samosa, Apple) or upload a photo for detailed analysis.'
+              : analysisResult.analysis
+            }
           </p>
         </div>
       )}
@@ -60,7 +61,10 @@ const FoodAnalysisCard = ({ analysisResult, onAddToDiary }) => {
             Smart Wellness Recommendation
           </h4>
           <p style={{ fontSize: '0.925rem', color: '#166534', lineHeight: 1.6 }}>
-            {analysisResult.suggestion}
+            {analysisResult.suggestion === 'N/A'
+              ? 'N/A — Specify a detailed food item to receive personalized wellness suggestions.'
+              : analysisResult.suggestion
+            }
           </p>
         </div>
       )}
@@ -85,28 +89,27 @@ const FoodAnalysisCard = ({ analysisResult, onAddToDiary }) => {
         </div>
       )}
 
-      {savedSuccess ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-success)', fontWeight: 700, justifyContent: 'center', padding: '0.75rem', backgroundColor: 'var(--primary-light)', borderRadius: 'var(--radius-md)' }}>
-          <CheckCircle2 size={20} />
-          <span>Saved to Food Diary! Redirecting...</span>
-        </div>
-      ) : (
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
         <button
           className="btn btn-primary btn-lg"
-          onClick={handleAdd}
-          disabled={isSaving}
-          style={{ marginTop: '0.5rem' }}
+          onClick={() => navigate('/dashboard')}
+          style={{ flex: 1, minWidth: '200px' }}
         >
-          {isSaving ? (
-            <span>Saving...</span>
-          ) : (
-            <>
-              <PlusCircle size={18} />
-              <span>Save to Food Diary</span>
-            </>
-          )}
+          <Home size={18} />
+          <span>Done & Go to Home Timeline</span>
         </button>
-      )}
+
+        {onReset && (
+          <button
+            className="btn btn-secondary btn-lg"
+            onClick={onReset}
+            style={{ flex: 1, minWidth: '180px' }}
+          >
+            <RefreshCw size={18} />
+            <span>Log Another Food</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 };

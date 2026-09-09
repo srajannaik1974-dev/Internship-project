@@ -247,30 +247,82 @@ export const deleteFoodEntry = async (id) => {
   }
 };
 
+const isUnspecifiedOrVagueFoodInput = (text) => {
+  if (!text || typeof text !== 'string') return true;
+  const clean = text.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
+  if (!clean) return true;
+
+  const specificFoodKeywords = [
+    'biryani', 'samosa', 'dosa', 'idli', 'vada', 'poori', 'paratha', 'naan', 'roti', 'chapati',
+    'paneer', 'tikka', 'butter chicken', 'dal', 'chole', 'rajma', 'khichdi', 'pulao', 'curry',
+    'gulab jamun', 'jalebi', 'rasgulla', 'kaju katli', 'mysore pak', 'ladoo', 'laddu', 'halwa',
+    'barfi', 'kheer', 'payasam', 'rasmalai', 'soan papdi', 'pedha', 'peda', 'sandesh',
+    'ice cream', 'cake', 'brownie', 'pastry', 'donut', 'doughnut', 'cookie', 'biscuit', 'chocolate',
+    'pizza', 'burger', 'sandwich', 'pasta', 'noodle', 'noodles', 'chowmein', 'momos', 'fries',
+    'apple', 'banana', 'mango', 'orange', 'grapes', 'strawberry', 'watermelon', 'papaya', 'pineapple',
+    'salad', 'soup', 'egg', 'eggs', 'omelette', 'fish', 'chicken', 'mutton', 'beef', 'pork', 'shrimp',
+    'milk', 'tea', 'chai', 'coffee', 'juice', 'smoothie', 'soda', 'lassi', 'shake', 'curd', 'yogurt'
+  ];
+
+  for (const keyword of specificFoodKeywords) {
+    if (clean.includes(keyword)) return false;
+  }
+
+  const genericCategoryWords = [
+    'sweet', 'sweets', 'food', 'snack', 'snacks', 'meal', 'meals',
+    'breakfast', 'lunch', 'dinner', 'dessert', 'desserts', 'drink', 'drinks',
+    'beverage', 'something', 'smth', 'stuff', 'anything', 'nothing', 'item',
+    'junk', 'fast food', 'healthy food'
+  ];
+
+  const words = clean.split(/\s+/);
+  const containsGenericCategory = words.some(w => genericCategoryWords.includes(w));
+  if (containsGenericCategory) return true;
+
+  if (words.length <= 4) return true;
+
+  return false;
+};
+
 /**
  * FOOD ANALYSIS API (Multipart / Form Data)
  */
 export const analyzeFood = async (formData) => {
-  try {
-    // If input is not already FormData, convert it or send directly
-    let body = formData;
-    let config = {};
+  let foodDesc = 'Food item';
+  let hasImageFile = false;
 
-    // When sending FormData, let Axios automatically manage the Content-Type header with the boundary
+  if (formData instanceof FormData) {
+    foodDesc = formData.get('food_description') || formData.get('food_name') || 'Food item';
+    hasImageFile = !!formData.get('image');
+  } else if (typeof formData === 'object') {
+    foodDesc = formData.food_description || formData.food_name || 'Food item';
+    hasImageFile = !!formData.image;
+  }
+
+  // Instant N/A check for vague/unspecified text without image
+  if (!hasImageFile && isUnspecifiedOrVagueFoodInput(foodDesc)) {
+    return {
+      food_name: 'N/A',
+      wellness_level: 'N/A',
+      analysis: 'N/A',
+      suggestion: 'N/A',
+      estimated_nutrition: {
+        calories: 'N/A',
+        protein: 'N/A',
+        carbohydrates: 'N/A',
+        fat: 'N/A',
+        fiber: 'N/A'
+      }
+    };
+  }
+
+  try {
     const response = await apiClient.post('/analyze', formData);
     return response.data;
   } catch (error) {
     console.log('[API Service] Backend unavailable for POST /analyze-food, generating mock analysis.');
     
-    // Simulate API delay for realism
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    let foodDesc = 'Food item';
-    if (formData instanceof FormData) {
-      foodDesc = formData.get('food_description') || formData.get('food_name') || 'Food item';
-    } else if (typeof formData === 'object') {
-      foodDesc = formData.food_description || formData.food_name || 'Food item';
-    }
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     const descLower = foodDesc.toLowerCase();
     let result = sampleFoodAnalysis.Default;
@@ -285,10 +337,10 @@ export const analyzeFood = async (formData) => {
         suggestion: 'Balance this meal with fresh vegetables and adequate hydration.',
         estimated_nutrition: {
           calories: 280,
-          protein: "8g",
-          carbs: "38g",
-          fats: "9g",
-          fiber: "3g"
+          protein: 8,
+          carbohydrates: 38,
+          fat: 9,
+          fiber: 3
         }
       };
     }

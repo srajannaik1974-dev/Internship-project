@@ -31,35 +31,49 @@ Details of the meal input:
 - Quantity: ${quantity || "Standard portion"}
 
 Your task:
-1. Identify the most likely food item.
-2. Estimate the approximate nutrition values based on the identified food and provided quantity.
-3. Perform a wellness analysis. The wellness level MUST be evaluated and categorised into exactly one of these options:
-   - "Low Concern" (for highly nutritious, balanced meals)
-   - "Moderate Concern" (for meals that are somewhat balanced but might contain excess sugars, sodium, fat, or calories depending on portion)
-   - "High Concern" (for highly processed meals, very high calorie/fat/sugar content, or options that generally offer low nutritional density)
-4. Offer a healthier suggestion (e.g., healthier alternatives, portion control, or adding vegetables/proteins).
+1. First, check if the input (description or image) refers to a specific, recognizable food or beverage item.
+   - If the input is generic (e.g. "i have food", "food", "something", "stuff", "hello") OR non-food related (e.g. pencil, car, non-food object), YOU MUST return "N/A" for all fields.
+2. If it IS a specific food item:
+   - Identify the food item name.
+   - Estimate approximate nutrition values (calories, protein, carbohydrates, fat, fiber).
+   - Assign wellness level: "Low Concern", "Moderate Concern", or "High Concern".
+   - Provide a wellness analysis and recommendation.
 
 CRITICAL MEDICAL SAFETY CONSTRAINTS:
 - Do NOT diagnose medical conditions or diseases.
 - Do NOT claim that a food is guaranteed medically safe or medically dangerous.
 - Do NOT prescribe treatments or medication.
 - Always frame nutrition values as estimates. Use non-definitive wording.
-- Incorporate safety phrases in your response text where appropriate (e.g., "This meal may not align with your saved wellness preferences", "This is an approximate nutrition estimate", "This information is for wellness guidance and is not medical advice").
 
-You must return ONLY a valid JSON object. Do not include markdown formatting like \`\`\`json or \`\`\` around the JSON response. Do not include any explanations or commentary outside the JSON object.
+You must return ONLY a valid JSON object without markdown formatting.
 
-The JSON response MUST match this exact schema:
+If the input IS NOT a valid specific food item, return EXACTLY this JSON:
 {
-  "food_name": "Name of the identified food",
-  "wellness_level": "Low Concern" | "Moderate Concern" | "High Concern",
-  "analysis": "A concise wellness and nutritional analysis. Include the safety disclaimer.",
-  "suggestion": "A supportive, actionable suggestion for wellness.",
+  "food_name": "N/A",
+  "wellness_level": "N/A",
+  "analysis": "N/A",
+  "suggestion": "N/A",
   "estimated_nutrition": {
-    "calories": 120, // Must be an integer representing kcal
-    "protein": 10, // Must be an integer representing grams
-    "carbohydrates": 20, // Must be an integer representing grams
-    "fat": 5, // Must be an integer representing grams
-    "fiber": 2 // Must be an integer representing grams
+    "calories": "N/A",
+    "protein": "N/A",
+    "carbohydrates": "N/A",
+    "fat": "N/A",
+    "fiber": "N/A"
+  }
+}
+
+If the input IS a valid specific food item, return:
+{
+  "food_name": "Name of identified food",
+  "wellness_level": "Low Concern" | "Moderate Concern" | "High Concern",
+  "analysis": "Wellness analysis text...",
+  "suggestion": "Recommendation text...",
+  "estimated_nutrition": {
+    "calories": 250,
+    "protein": 12,
+    "carbohydrates": 30,
+    "fat": 8,
+    "fiber": 3
   }
 }
 `;

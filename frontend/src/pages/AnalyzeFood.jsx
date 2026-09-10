@@ -48,7 +48,7 @@ const AnalyzeFood = () => {
     setAnalysisResult(null);
     try {
       const formData = new FormData();
-      formData.append('food_description', foodDescription.trim() || 'Uploaded Food Image');
+      formData.append('food_description', foodDescription.trim());
       formData.append('meal_type', mealType);
       formData.append('quantity', quantity.trim());
       if (imageFile) formData.append('image', imageFile);
@@ -62,7 +62,8 @@ const AnalyzeFood = () => {
       setAnalysisResult(fullResult);
     } catch (err) {
       console.error('Food logging error:', err);
-      setAnalysisError('Food logging failed. Please try again.');
+      const msg = err?.response?.data?.error || err?.message || 'Food analysis failed. Please try again.';
+      setAnalysisError(msg);
     } finally {
       setIsAnalyzing(false);
     }

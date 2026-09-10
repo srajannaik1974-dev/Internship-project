@@ -32,7 +32,7 @@ const MealCard = ({ meal, onClick = null }) => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.785rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
             <Utensils size={13} />
-            <span style={{ fontWeight: 600 }}>{mealType}</span>
+            <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{mealType}</span>
             <span>•</span>
             <Clock size={13} />
             <span>{time}</span>

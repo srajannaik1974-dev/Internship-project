@@ -2,22 +2,28 @@ import axios from 'axios';
 import { initialMockProfile, initialMockFoodDiary, sampleFoodAnalysis, initialDailyInsight } from '../data/mockData';
 
 // API Configuration using Vite environment variable
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 20000,
+  // Do NOT set a global Content-Type here.
+  // Axios sets it automatically per-request:
+  //   - JSON body  → 'application/json'
+  //   - FormData   → 'multipart/form-data; boundary=...' (set by browser)
+  timeout: 60000,
 });
 
-// Axios Request Interceptor to attach JWT token to every request
+// Axios Request Interceptor — attach JWT + set Content-Type for JSON requests
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Only set JSON content-type when NOT sending FormData
+    // (FormData needs the browser to set multipart/form-data with its boundary)
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = config.headers['Content-Type'] || 'application/json';
     }
     return config;
   },
@@ -279,8 +285,6 @@ const isUnspecifiedOrVagueFoodInput = (text) => {
   const containsGenericCategory = words.some(w => genericCategoryWords.includes(w));
   if (containsGenericCategory) return true;
 
-  if (words.length <= 4) return true;
-
   return false;
 };
 
@@ -297,6 +301,10 @@ export const analyzeFood = async (formData) => {
   } else if (typeof formData === 'object') {
     foodDesc = formData.food_description || formData.food_name || 'Food item';
     hasImageFile = !!formData.image;
+  }
+
+  if (!foodDesc || foodDesc.trim() === '') {
+    foodDesc = hasImageFile ? 'Captured Food Image' : 'Food item';
   }
 
   // Instant N/A check for vague/unspecified text without image
@@ -317,35 +325,41 @@ export const analyzeFood = async (formData) => {
   }
 
   try {
-    const response = await apiClient.post('/analyze', formData);
+    const config = formData instanceof FormData
+      ? { headers: { 'Content-Type': undefined } }
+      : {};
+    const response = await apiClient.post('/analyze', formData, config);
     return response.data;
   } catch (error) {
-    console.log('[API Service] Backend unavailable for POST /analyze-food, generating mock analysis.');
-    
+    const isNetworkDown = !error.response;
+    if (!isNetworkDown) {
+      throw error;
+    }
+
+    console.warn('[API Service] Backend unreachable — using offline mock analysis.');
     await new Promise(resolve => setTimeout(resolve, 800));
 
     const descLower = foodDesc.toLowerCase();
-    let result = sampleFoodAnalysis.Default;
-
-    if (descLower.includes('samosa')) {
-      result = sampleFoodAnalysis.Samosa;
-    } else {
-      result = {
-        food_name: foodDesc,
-        wellness_level: descLower.includes('salad') || descLower.includes('fruit') || descLower.includes('idli') ? 'Low Concern' : 'Moderate Concern',
-        analysis: `Analysis for "${foodDesc}": Contains carbohydrates and essential dietary components.`,
-        suggestion: 'Balance this meal with fresh vegetables and adequate hydration.',
-        estimated_nutrition: {
-          calories: 280,
-          protein: 8,
-          carbohydrates: 38,
-          fat: 9,
-          fiber: 3
-        }
-      };
+    
+    // Check if sampleFoodAnalysis is imported and available, fallback if not
+    if (typeof sampleFoodAnalysis !== 'undefined') {
+        if (descLower.includes('samosa')) return sampleFoodAnalysis.Samosa;
     }
 
-    return result;
+    return {
+      food_name: foodDesc,
+      wellness_level: (descLower.includes('salad') || descLower.includes('fruit') || descLower.includes('idli'))
+        ? 'Low Concern' : 'Moderate Concern',
+      analysis: `Offline estimate for "${foodDesc}". Connect to the internet for accurate AI analysis. This is for wellness guidance and is not medical advice.`,
+      suggestion: 'Balance this meal with fresh vegetables and adequate hydration.',
+      estimated_nutrition: {
+        calories: 280,
+        protein: 8,
+        carbohydrates: 38,
+        fat: 9,
+        fiber: 3
+      }
+    };
   }
 };
 

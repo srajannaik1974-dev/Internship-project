@@ -444,19 +444,19 @@ const FoodDiaryPage = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
               <Utensils size={16} style={{ color: 'var(--primary)' }} />
               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase' }}>
-                {selectedMealDetail.meal_type}
+                {selectedMealDetail.category || selectedMealDetail.meal_type || 'Meal'}
               </span>
               <span style={{ color: 'var(--text-light)' }}>•</span>
               <Clock size={14} style={{ color: 'var(--text-light)' }} />
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{selectedMealDetail.time}</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{selectedMealDetail.time || 'Logged'}</span>
             </div>
 
             <h2 className="h2-heading" style={{ marginBottom: '0.85rem' }}>
-              {selectedMealDetail.food_name}
+              {selectedMealDetail.name || selectedMealDetail.food_name || 'Logged Food'}
             </h2>
 
             <div style={{ marginBottom: '1.25rem' }}>
-              <RiskBadge level={selectedMealDetail.wellness_level} />
+              <RiskBadge level={selectedMealDetail.wellness_level || selectedMealDetail.wellnessLevel || 'Low Concern'} />
             </div>
 
             {selectedMealDetail.quantity && (

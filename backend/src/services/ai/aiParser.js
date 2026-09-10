@@ -36,10 +36,30 @@ function parseAndValidateFoodAnalysis(rawResponse) {
     }
   }
 
+  // Check if Gemini determined the input is N/A (non-food item or generic non-food phrase)
+  const isNA = String(data.food_name).trim().toUpperCase() === 'N/A' ||
+               String(data.wellness_level).trim().toUpperCase() === 'N/A' ||
+               String(data.analysis).trim().toUpperCase() === 'N/A';
+
+  if (isNA) {
+    return {
+      food_name: 'N/A',
+      wellness_level: 'N/A',
+      analysis: 'N/A',
+      suggestion: 'N/A',
+      estimated_nutrition: {
+        calories: 'N/A',
+        protein: 'N/A',
+        carbohydrates: 'N/A',
+        fat: 'N/A',
+        fiber: 'N/A'
+      }
+    };
+  }
+
   // Validate wellness_level
   const allowedWellnessLevels = ['Low Concern', 'Moderate Concern', 'High Concern'];
   if (!allowedWellnessLevels.includes(data.wellness_level)) {
-    // Attempt to map or fallback to Moderate Concern if close, or throw
     const normalized = String(data.wellness_level).trim().toLowerCase();
     if (normalized.includes('low')) {
       data.wellness_level = 'Low Concern';
@@ -57,17 +77,17 @@ function parseAndValidateFoodAnalysis(rawResponse) {
   }
 
   const nutritionKeys = ['calories', 'protein', 'carbohydrates', 'fat', 'fiber'];
+  const formattedNutrition = {};
   for (const key of nutritionKeys) {
-    if (nutrition[key] === undefined || nutrition[key] === null) {
-      // Provide fallback default instead of throwing to avoid total failure
-      nutrition[key] = 0;
+    const val = nutrition[key];
+    if (val === 'N/A' || val === 'n/a' || val === null || val === undefined) {
+      formattedNutrition[key] = (data.wellness_level === 'N/A') ? 'N/A' : 0;
     } else {
-      // Coerce/validate as number
-      let num = Number(nutrition[key]);
+      let num = Number(val);
       if (isNaN(num)) {
-        nutrition[key] = 0;
+        formattedNutrition[key] = (typeof val === 'string' && val.trim().toUpperCase() === 'N/A') ? 'N/A' : 0;
       } else {
-        nutrition[key] = Math.round(num);
+        formattedNutrition[key] = Math.round(num);
       }
     }
   }
@@ -77,13 +97,7 @@ function parseAndValidateFoodAnalysis(rawResponse) {
     wellness_level: data.wellness_level,
     analysis: String(data.analysis || '').trim(),
     suggestion: String(data.suggestion || '').trim(),
-    estimated_nutrition: {
-      calories: nutrition.calories,
-      protein: nutrition.protein,
-      carbohydrates: nutrition.carbohydrates,
-      fat: nutrition.fat,
-      fiber: nutrition.fiber
-    }
+    estimated_nutrition: formattedNutrition
   };
 }
 

@@ -27,13 +27,16 @@ const Dashboard = () => {
     ? todaysMeals.data
     : [];
 
-  const getMealForType = (type) => {
-    return mealsList.find(m => (m.meal_type || m.mealType || m.category || m.type || '').toLowerCase() === type.toLowerCase()) || null;
+  const getMealsForType = (type) => {
+    return mealsList.filter(m => {
+      const mealCat = (m.category || m.meal_type || m.mealType || m.type || '').toLowerCase();
+      return mealCat === type.toLowerCase();
+    });
   };
 
-  const loggedCount = mealsList.length;
-  const nextMeal = mealTypes.find(({ name }) => !getMealForType(name) && !skippedMeals.includes(name))?.name || 'All meals handled';
-  const progress = Math.round(((loggedCount + skippedMeals.length) / mealTypes.length) * 100);
+  const loggedSlotsCount = mealTypes.filter(({ name }) => getMealsForType(name).length > 0).length;
+  const nextMeal = mealTypes.find(({ name }) => getMealsForType(name).length === 0 && !skippedMeals.includes(name))?.name || 'All meals handled';
+  const progress = Math.min(100, Math.round(((loggedSlotsCount + skippedMeals.length) / mealTypes.length) * 100));
 
   return (
     <div className="dashboard-meals-page animate-fade-in">
@@ -47,7 +50,7 @@ const Dashboard = () => {
         </div>
         <div className="dashboard-hero-side">
           <div className="dashboard-hero-action">
-            <button className="btn btn-primary dashboard-log-button" onClick={() => navigate('/analyze', { state: { mealType: nextMeal !== 'All meals handled' ? nextMeal : '' } })} disabled={nextMeal === 'All meals handled'}>
+            <button className="btn btn-primary dashboard-log-button" onClick={() => navigate('/analyze', { state: { mealType: nextMeal !== 'All meals handled' ? nextMeal : 'Breakfast' } })}>
               <Plus size={18} /> Log meal
             </button>
           </div>
@@ -58,9 +61,9 @@ const Dashboard = () => {
         <div className="dashboard-board-heading">
           <div>
             <h2><span className="dashboard-heading-mark"><Utensils size={16} /></span>Meal timeline</h2>
-            <p>{loggedCount === 0 ? 'Nothing logged yet. Start with your next bite.' : `${loggedCount} meal${loggedCount === 1 ? '' : 's'} logged today.`}</p>
+            <p>{mealsList.length === 0 ? 'Nothing logged yet. Start with your next bite.' : `${mealsList.length} food item${mealsList.length === 1 ? '' : 's'} logged today.`}</p>
           </div>
-          <span className="dashboard-count">{loggedCount}/4</span>
+          <span className="dashboard-count">{loggedSlotsCount}/4</span>
         </div>
 
         <div className="dashboard-progress-wrap">
@@ -70,18 +73,43 @@ const Dashboard = () => {
 
         <div className="dashboard-meal-slots">
           {mealTypes.map(({ name, icon: MealIcon, color }) => {
-            const loggedMeal = getMealForType(name);
-            const isSkipped = skippedMeals.includes(name) && !loggedMeal;
+            const loggedMeals = getMealsForType(name);
+            const isLogged = loggedMeals.length > 0;
+            const isSkipped = skippedMeals.includes(name) && !isLogged;
+
+            let statusText = 'Ready to log';
+            if (isLogged) {
+              if (loggedMeals.length === 1) {
+                const item = loggedMeals[0];
+                const itemName = item.food_name || item.name || 'Logged meal';
+                const cal = item.calories || item.estimated_nutrition?.calories;
+                statusText = cal ? `${itemName} (${cal} kcal)` : itemName;
+              } else {
+                const names = loggedMeals.map(m => m.food_name || m.name || 'Item').join(', ');
+                statusText = `${loggedMeals.length} items (${names})`;
+              }
+            } else if (isSkipped) {
+              statusText = 'Skipped today';
+            }
+
             return (
-              <div className={`dashboard-meal-slot dashboard-meal-slot--${color} ${loggedMeal ? 'is-logged' : ''} ${isSkipped ? 'is-skipped' : ''}`} key={name}>
+              <div
+                className={`dashboard-meal-slot dashboard-meal-slot--${color} ${isLogged ? 'is-logged' : ''} ${isSkipped ? 'is-skipped' : ''}`}
+                key={name}
+                onClick={() => navigate('/analyze', { state: { mealType: name } })}
+                style={{ cursor: 'pointer' }}
+                title={`Click to log ${name}`}
+              >
                 <div className="dashboard-meal-slot__icon">
                   <MealIcon size={18} />
                 </div>
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <strong>{name}</strong>
-                  <span>{loggedMeal ? (loggedMeal.food_name || loggedMeal.name || 'Logged meal') : isSkipped ? 'Skipped today' : 'Ready to log'}</span>
+                  <span title={statusText}>{statusText}</span>
                 </div>
-                <span className="dashboard-meal-slot__status">{loggedMeal ? <CheckCircle2 size={15} /> : isSkipped ? '—' : null}</span>
+                <span className="dashboard-meal-slot__status">
+                  {isLogged ? <CheckCircle2 size={15} /> : isSkipped ? '—' : <Plus size={15} style={{ opacity: 0.7 }} />}
+                </span>
               </div>
             );
           })}

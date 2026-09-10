@@ -48,6 +48,7 @@ const createFood = async (req, res, next) => {
             food_name,
             category,
             mealType,
+            meal_type,
             calories,
             protein,
             carbs,
@@ -55,7 +56,8 @@ const createFood = async (req, res, next) => {
             portion,
             quantity,
             date,
-            time
+            time,
+            estimated_nutrition
         } = req.body;
 
         const foodName = name || food_name;
@@ -66,14 +68,28 @@ const createFood = async (req, res, next) => {
             });
         }
 
+        const parseNum = (val) => {
+            if (typeof val === 'number') return val;
+            if (typeof val === 'string') {
+                const match = val.match(/\d+/);
+                return match ? parseInt(match[0], 10) : 0;
+            }
+            return 0;
+        };
+
+        const calVal = parseNum(calories) || parseNum(estimated_nutrition?.calories) || 0;
+        const protVal = parseNum(protein) || parseNum(estimated_nutrition?.protein) || 0;
+        const carbVal = parseNum(carbs) || parseNum(estimated_nutrition?.carbs) || 0;
+        const fatVal = parseNum(fats) || parseNum(estimated_nutrition?.fats) || 0;
+
         const food = await Food.create({
             user: req.user._id,
             name: foodName,
-            category: (category || mealType || 'snack').toLowerCase(),
-            calories: Number(calories) || 0,
-            protein: Number(protein) || 0,
-            carbs: Number(carbs) || 0,
-            fats: Number(fats) || 0,
+            category: (category || mealType || meal_type || 'snack').toLowerCase(),
+            calories: calVal,
+            protein: protVal,
+            carbs: carbVal,
+            fats: fatVal,
             portion: portion || quantity || '1 serving',
             date: date || new Date().toISOString().split('T')[0],
             time: time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })

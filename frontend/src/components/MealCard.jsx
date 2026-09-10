@@ -5,14 +5,14 @@ import { Clock, Utensils } from 'lucide-react';
 const MealCard = ({ meal, onClick = null }) => {
   if (!meal) return null;
 
-  const {
-    time = 'Logged',
-    wellness_level = 'Low Concern',
-    analysis = ''
-  } = meal;
-
-  const foodName = meal.name || meal.food_name || 'Logged Food';
-  const mealType = meal.category || meal.meal_type || 'Meal';
+  const foodName = meal.food_name || meal.name || 'Logged Food';
+  const rawMealType = meal.meal_type || meal.category || meal.mealType || 'Meal';
+  const mealType = rawMealType.charAt(0).toUpperCase() + rawMealType.slice(1);
+  const time = meal.time || 'Logged';
+  const wellnessLevel = meal.wellness_level || 'Low Concern';
+  const calories = meal.calories || meal.estimated_nutrition?.calories;
+  const portion = meal.portion || meal.quantity;
+  const analysis = meal.analysis || (calories ? `${calories} kcal${portion ? ` • ${portion}` : ''}` : '');
 
   return (
     <div
@@ -41,7 +41,7 @@ const MealCard = ({ meal, onClick = null }) => {
             {foodName}
           </h3>
         </div>
-        <RiskBadge level={wellness_level} />
+        <RiskBadge level={wellnessLevel} />
       </div>
 
       {analysis && (

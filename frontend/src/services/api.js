@@ -2,7 +2,7 @@ import axios from 'axios';
 import { initialMockProfile, initialMockFoodDiary, sampleFoodAnalysis, initialDailyInsight } from '../data/mockData';
 
 // API Configuration using Vite environment variable
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -253,41 +253,99 @@ export const deleteFoodEntry = async (id) => {
   }
 };
 
+const isUnspecifiedOrVagueFoodInput = (text) => {
+  if (!text || typeof text !== 'string') return true;
+  const clean = text.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
+  if (!clean) return true;
+
+  const specificFoodKeywords = [
+    'biryani', 'samosa', 'dosa', 'idli', 'vada', 'poori', 'paratha', 'naan', 'roti', 'chapati',
+    'paneer', 'tikka', 'butter chicken', 'dal', 'chole', 'rajma', 'khichdi', 'pulao', 'curry',
+    'gulab jamun', 'jalebi', 'rasgulla', 'kaju katli', 'mysore pak', 'ladoo', 'laddu', 'halwa',
+    'barfi', 'kheer', 'payasam', 'rasmalai', 'soan papdi', 'pedha', 'peda', 'sandesh',
+    'ice cream', 'cake', 'brownie', 'pastry', 'donut', 'doughnut', 'cookie', 'biscuit', 'chocolate',
+    'pizza', 'burger', 'sandwich', 'pasta', 'noodle', 'noodles', 'chowmein', 'momos', 'fries',
+    'apple', 'banana', 'mango', 'orange', 'grapes', 'strawberry', 'watermelon', 'papaya', 'pineapple',
+    'salad', 'soup', 'egg', 'eggs', 'omelette', 'fish', 'chicken', 'mutton', 'beef', 'pork', 'shrimp',
+    'milk', 'tea', 'chai', 'coffee', 'juice', 'smoothie', 'soda', 'lassi', 'shake', 'curd', 'yogurt'
+  ];
+
+  for (const keyword of specificFoodKeywords) {
+    if (clean.includes(keyword)) return false;
+  }
+
+  const genericCategoryWords = [
+    'sweet', 'sweets', 'food', 'snack', 'snacks', 'meal', 'meals',
+    'breakfast', 'lunch', 'dinner', 'dessert', 'desserts', 'drink', 'drinks',
+    'beverage', 'something', 'smth', 'stuff', 'anything', 'nothing', 'item',
+    'junk', 'fast food', 'healthy food'
+  ];
+
+  const words = clean.split(/\s+/);
+  const containsGenericCategory = words.some(w => genericCategoryWords.includes(w));
+  if (containsGenericCategory) return true;
+
+  return false;
+};
+
 /**
  * FOOD ANALYSIS API (Multipart / Form Data)
  */
 export const analyzeFood = async (formData) => {
+  let foodDesc = 'Food item';
+  let hasImageFile = false;
+
+  if (formData instanceof FormData) {
+    foodDesc = formData.get('food_description') || formData.get('food_name') || 'Food item';
+    hasImageFile = !!formData.get('image');
+  } else if (typeof formData === 'object') {
+    foodDesc = formData.food_description || formData.food_name || 'Food item';
+    hasImageFile = !!formData.image;
+  }
+
+  if (!foodDesc || foodDesc.trim() === '') {
+    foodDesc = hasImageFile ? 'Captured Food Image' : 'Food item';
+  }
+
+  // Instant N/A check for vague/unspecified text without image
+  if (!hasImageFile && isUnspecifiedOrVagueFoodInput(foodDesc)) {
+    return {
+      food_name: 'N/A',
+      wellness_level: 'N/A',
+      analysis: 'N/A',
+      suggestion: 'N/A',
+      estimated_nutrition: {
+        calories: 'N/A',
+        protein: 'N/A',
+        carbohydrates: 'N/A',
+        fat: 'N/A',
+        fiber: 'N/A'
+      }
+    };
+  }
+
   try {
-    // When sending FormData, Content-Type MUST NOT be set manually.
-    // Setting it to undefined removes the instance-level 'application/json'
-    // header so the browser can inject 'multipart/form-data; boundary=...'.
-    // Without the correct boundary, multer won't parse the image file.
     const config = formData instanceof FormData
       ? { headers: { 'Content-Type': undefined } }
       : {};
     const response = await apiClient.post('/analyze', formData, config);
     return response.data;
   } catch (error) {
-    // Re-throw the actual error so the UI shows the real problem.
-    // Only fall back to mock data when the backend is completely unreachable (network error / ECONNREFUSED).
     const isNetworkDown = !error.response;
     if (!isNetworkDown) {
-      // Backend responded with an error — surface it to the user.
       throw error;
     }
 
     console.warn('[API Service] Backend unreachable — using offline mock analysis.');
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    let foodDesc = 'Food item';
-    if (formData instanceof FormData) {
-      foodDesc = formData.get('food_description') || 'Food item';
-      if (!foodDesc || foodDesc.trim() === '') foodDesc = 'Captured Food Image';
-    } else if (typeof formData === 'object') {
-      foodDesc = formData.food_description || 'Food item';
+    const descLower = foodDesc.toLowerCase();
+    
+    // Check if sampleFoodAnalysis is imported and available, fallback if not
+    if (typeof sampleFoodAnalysis !== 'undefined') {
+        if (descLower.includes('samosa')) return sampleFoodAnalysis.Samosa;
     }
 
-    const descLower = foodDesc.toLowerCase();
     return {
       food_name: foodDesc,
       wellness_level: (descLower.includes('salad') || descLower.includes('fruit') || descLower.includes('idli'))

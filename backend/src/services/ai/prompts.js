@@ -53,25 +53,41 @@ Meal context provided by the user:
 - Meal Type: ${mealType || 'Not specified'}
 - Stated Quantity / Portion: ${quantity || 'Estimate from image'}
 
-Your output requirements:
-1. food_name: Specific dish name(s). Never use "Food item" or "Unknown". If image only, name what you SEE.
-2. estimated_nutrition: Realistic values for the ACTUAL portion visible or stated — not generic averages.
-   - For a full plate of rice + curry, calories should be 600–900 kcal, not 300.
-   - For a single samosa, calories ≈ 150–200 kcal.
-   - For a large burger, calories ≈ 450–700 kcal.
-   - Scale all macros proportionally to the portion.
-3. wellness_level: EXACTLY one of:
-   - "Low Concern"      → nutritious, balanced, minimally processed
-   - "Moderate Concern" → decent but has excess sugar / sodium / fat / calories
-   - "High Concern"     → highly processed, very high calorie/fat/sugar, low nutritional value
-4. analysis: 2–3 sentences covering key nutritional highlights and wellness impact.
-5. suggestion: One specific, actionable improvement (e.g., "Add a cup of dal for 10g extra protein").
+Your task and output requirements:
+1. First, check if the input refers to a specific, recognizable food or beverage. 
+   - If the input is clearly generic nonsense (e.g. "stuff", "hello") OR a non-food item, YOU MUST return "N/A" for all fields.
+   - However, if the input is ANY recognizable food item (like "samosa", "apple", "rice", "curry"), treat it as a VALID food item and provide the analysis! Don't be overly strict.
+2. If it IS a specific food item:
+   - Identify the food item name (be specific, e.g. "Samosa", not just "Food item").
+   - Estimate realistic nutrition values for the ACTUAL portion visible/stated (not generic averages).
+     - Scale all macros proportionally to the portion.
+   - Assign wellness level: EXACTLY one of "Low Concern", "Moderate Concern", or "High Concern".
+   - Provide a 2-3 sentence wellness analysis covering key nutritional highlights and wellness impact.
+   - Provide one specific, actionable recommendation/suggestion.
 
-MANDATORY DISCLAIMER: Include "This is for wellness guidance and is not medical advice." in the analysis field.
+CRITICAL MEDICAL SAFETY CONSTRAINTS:
+- Do NOT diagnose medical conditions or diseases.
+- Do NOT prescribe treatments or medication.
+- MANDATORY DISCLAIMER: Include "This is for wellness guidance and is not medical advice." in the analysis field.
 
 Return ONLY a valid JSON object — no markdown fences, no extra text outside the JSON.
 
-Required JSON schema (all nutrition values MUST be plain integers — no units, no strings):
+If the input IS NOT a valid specific food item, return EXACTLY this JSON:
+{
+  "food_name": "N/A",
+  "wellness_level": "N/A",
+  "analysis": "N/A",
+  "suggestion": "N/A",
+  "estimated_nutrition": {
+    "calories": "N/A",
+    "protein": "N/A",
+    "carbohydrates": "N/A",
+    "fat": "N/A",
+    "fiber": "N/A"
+  }
+}
+
+If the input IS a valid specific food item, return this JSON schema (nutrition values MUST be plain integers):
 {
   "food_name": "Specific name of identified food(s)",
   "wellness_level": "Low Concern" | "Moderate Concern" | "High Concern",

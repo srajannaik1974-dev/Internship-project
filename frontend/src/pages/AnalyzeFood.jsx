@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import FoodInput from '../components/FoodInput';
 import FoodUpload from '../components/FoodUpload';
@@ -23,6 +23,12 @@ const AnalyzeFood = () => {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [analysisError, setAnalysisError] = useState(null);
 
+  useEffect(() => {
+    if (location.state?.mealType) {
+      setMealType(location.state.mealType);
+    }
+  }, [location.state]);
+
   const validateForm = () => {
     const newErrors = {};
     if (!foodDescription.trim() && !imageFile) {
@@ -46,9 +52,16 @@ const AnalyzeFood = () => {
       formData.append('meal_type', mealType);
       formData.append('quantity', quantity.trim());
       if (imageFile) formData.append('image', imageFile);
+
       const result = await analyzeFood(formData);
-      setAnalysisResult({ ...result, meal_type: mealType, quantity });
+      const fullResult = { ...result, meal_type: mealType, quantity };
+      
+      // Auto-save entry immediately so it's logged into DB & home page updates!
+      await handleSaveToDiary(fullResult);
+
+      setAnalysisResult(fullResult);
     } catch (err) {
+      console.error('Food logging error:', err);
       const msg = err?.response?.data?.error || err?.message || 'Food analysis failed. Please try again.';
       setAnalysisError(msg);
     } finally {
@@ -57,14 +70,20 @@ const AnalyzeFood = () => {
   };
 
   const handleSaveToDiary = async (resultToSave) => {
+    const selectedMeal = resultToSave.meal_type || mealType;
     const payload = {
+      name: resultToSave.food_name,
       food_name: resultToSave.food_name,
-      meal_type: resultToSave.meal_type || mealType,
+      meal_type: selectedMeal,
+      mealType: selectedMeal,
+      category: selectedMeal.toLowerCase(),
       quantity: resultToSave.quantity || quantity,
+      portion: resultToSave.quantity || quantity,
       wellness_level: resultToSave.wellness_level,
       analysis: resultToSave.analysis,
       suggestion: resultToSave.suggestion,
-      estimated_nutrition: resultToSave.estimated_nutrition
+      estimated_nutrition: resultToSave.estimated_nutrition,
+      calories: resultToSave.estimated_nutrition?.calories || 0
     };
     return await createFoodEntry(payload);
   };
@@ -146,7 +165,7 @@ const AnalyzeFood = () => {
         {/* LOADING */}
         {isAnalyzing && (
           <div className="lf-card lf-loading-card">
-            <LoadingState message="Processing your food log..." />
+            <LoadingState message="Processing and logging your food..." />
           </div>
         )}
 
@@ -155,14 +174,8 @@ const AnalyzeFood = () => {
           <div className="lf-result-wrapper">
             <FoodAnalysisCard
               analysisResult={analysisResult}
-              onAddToDiary={handleSaveToDiary}
+              onReset={handleResetForm}
             />
-            <div className="lf-reset-row">
-              <button className="btn btn-secondary lf-reset-btn" onClick={handleResetForm}>
-                <RefreshCw size={15} />
-                Log Another Food
-              </button>
-            </div>
           </div>
         )}
 

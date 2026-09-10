@@ -16,8 +16,8 @@ const { GoogleGenAI } = require('@google/genai');
 const { getFoodAnalysisPrompt, getDailyInsightPrompt } = require('./prompts');
 const { parseAndValidateFoodAnalysis, parseAndValidateDailyInsight } = require('./aiParser');
 
-// Model definition — gemini-3.6-flash (confirmed available for this API key)
-const DEFAULT_MODEL = 'gemini-3.6-flash';
+// Model definition
+const DEFAULT_MODEL = 'gemini-2.5-flash';
 
 // Helper to initialize GoogleGenAI client securely
 function getAiClient() {
@@ -41,6 +41,51 @@ function getAiClient() {
  * @param {string} [params.image.mimeType] Mime type of the image (defaults to 'image/jpeg').
  * @returns {Promise<Object>} The parsed and validated nutritional/wellness analysis.
  */
+function isGenericNonFoodInput(text) {
+  if (!text || typeof text !== 'string') return true;
+  const clean = text.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
+  if (!clean) return true;
+
+  const specificFoodKeywords = [
+    'biryani', 'samosa', 'dosa', 'idli', 'vada', 'poori', 'paratha', 'naan', 'roti', 'chapati',
+    'paneer', 'tikka', 'butter chicken', 'dal', 'chole', 'rajma', 'khichdi', 'pulao', 'curry',
+    'gulab jamun', 'jalebi', 'rasgulla', 'kaju katli', 'mysore pak', 'ladoo', 'laddu', 'halwa',
+    'barfi', 'kheer', 'payasam', 'rasmalai', 'soan papdi', 'pedha', 'peda', 'sandesh',
+    'ice cream', 'cake', 'brownie', 'pastry', 'donut', 'doughnut', 'cookie', 'biscuit', 'chocolate',
+    'pizza', 'burger', 'sandwich', 'pasta', 'noodle', 'noodles', 'chowmein', 'momos', 'fries',
+    'apple', 'banana', 'mango', 'orange', 'grapes', 'strawberry', 'watermelon', 'papaya', 'pineapple',
+    'salad', 'soup', 'egg', 'eggs', 'omelette', 'fish', 'chicken', 'mutton', 'beef', 'pork', 'shrimp',
+    'milk', 'tea', 'chai', 'coffee', 'juice', 'smoothie', 'soda', 'lassi', 'shake', 'curd', 'yogurt'
+  ];
+
+  for (const keyword of specificFoodKeywords) {
+    if (clean.includes(keyword)) return false;
+  }
+
+  const genericCategoryWords = [
+    'sweet', 'sweets', 'food', 'snack', 'snacks', 'meal', 'meals',
+    'breakfast', 'lunch', 'dinner', 'dessert', 'desserts', 'drink', 'drinks',
+    'beverage', 'something', 'smth', 'stuff', 'anything', 'nothing', 'item',
+    'junk', 'fast food', 'healthy food'
+  ];
+
+  const words = clean.split(/\s+/);
+  const containsGenericCategory = words.some(w => genericCategoryWords.includes(w));
+  if (containsGenericCategory) return true;
+
+  return false;
+}
+
+/**
+ * Analyzes food based on description, meal type, quantity, and an optional image.
+ * 
+ * @param {Object} params Input parameters.
+ * @param {string} [params.foodDescription] Description of the food.
+ * @param {string} [params.mealType] Type of meal (e.g., Breakfast, Lunch, Dinner, Snack).
+ * @param {string} [params.quantity] Portion size or quantity description.
+ * @param {Object} [params.image] Optional image object.
+ * @returns {Promise<Object>} The parsed and validated nutritional/wellness analysis.
+ */
 async function analyzeFood({ foodDescription, mealType, quantity, image } = {}) {
   try {
     // 1. Validation of input
@@ -49,6 +94,23 @@ async function analyzeFood({ foodDescription, mealType, quantity, image } = {}) 
 
     if (!hasDescription && !hasImage) {
       throw new Error('Please provide either a food description or a food image for analysis.');
+    }
+
+    // 1b. Check if input is a generic non-food phrase when no image is present
+    if (!hasImage && isGenericNonFoodInput(foodDescription)) {
+      return {
+        food_name: 'N/A',
+        wellness_level: 'N/A',
+        analysis: 'N/A',
+        suggestion: 'N/A',
+        estimated_nutrition: {
+          calories: 'N/A',
+          protein: 'N/A',
+          carbohydrates: 'N/A',
+          fat: 'N/A',
+          fiber: 'N/A'
+        }
+      };
     }
 
     // 2. Initialize Gemini client
